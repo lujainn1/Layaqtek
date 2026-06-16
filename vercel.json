@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "backend/server.js",
+      "use": "@vercel/node",
+      "config": { "includeFiles": ["backend/**"] }
+    },
+    { "src": "frontend/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "backend/server.js" },
+    { "src": "/(.*\\.(html|js|css|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf))", "dest": "frontend/$1" },
+    { "src": "/", "dest": "frontend/index.html" }
+  ]
+}

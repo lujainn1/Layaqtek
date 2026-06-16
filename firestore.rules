@@ -1,0 +1,127 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helper Functions ────────────────────────────────────────────────────
+
+    // Only the authenticated owner of a document may access it
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // Validate a food-item map inside a meal array
+    function validFoodItem(item) {
+      return item.keys().hasAll(['id', 'name', 'calories', 'protein', 'carbs', 'fat', 'quantity'])
+          && item.calories is number && item.calories >= 0
+          && item.protein  is number && item.protein  >= 0
+          && item.carbs    is number && item.carbs    >= 0
+          && item.fat      is number && item.fat      >= 0
+          && item.quantity is number && item.quantity >  0;
+    }
+
+    // Validate the goals sub-object on a user document
+    function validGoals(g) {
+      return g.keys().hasAll(['calories', 'protein', 'carbs', 'fat', 'water'])
+          && g.calories is number && g.calories > 0
+          && g.protein  is number && g.protein  > 0
+          && g.carbs    is number && g.carbs    > 0
+          && g.fat      is number && g.fat      > 0
+          && g.water    is number && g.water    > 0;
+    }
+
+    // ─── /users/{uid} ────────────────────────────────────────────────────────
+    // Stores profile, hashed password, and nutrition goals.
+    //
+    // Schema:
+    //   uid          : string   – matches document ID & Firebase Auth UID
+    //   name         : string   – display name (2-50 chars)
+    //   email        : string   – unique, lowercase
+    //   password     : string   – bcrypt hash (never exposed to client)
+    //   goals        : map      – daily nutrition targets
+    //     calories   : number   (default 2000 kcal)
+    //     protein    : number   (default 150 g)
+    //     carbs      : number   (default 250 g)
+    //     fat        : number   (default 65 g)
+    //     water      : number   (default 8 cups)
+    //   createdAt    : timestamp
+    //   updatedAt    : timestamp
+
+    match /users/{uid} {
+      allow read:   if isOwner(uid);
+      allow create: if isOwner(uid)
+                    && request.resource.data.keys().hasAll(['uid','name','email','password','goals','createdAt','updatedAt'])
+                    && request.resource.data.name  is string
+                    && request.resource.data.email is string
+                    && validGoals(request.resource.data.goals);
+      allow update: if isOwner(uid)
+                    && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['uid','email','createdAt']))
+                    && (
+                         !request.resource.data.keys().hasAny(['goals'])
+                         || validGoals(request.resource.data.goals)
+                       );
+      allow delete: if isOwner(uid);
+
+      // ─── /users/{uid}/days/{date} ───────────────────────────────────────
+      // One document per calendar day (YYYY-MM-DD).
+      //
+      // Schema:
+      //   meals      : map
+      //     فطور     : array<FoodItem>   – Breakfast
+      //     غداء     : array<FoodItem>   – Lunch
+      //     عشاء     : array<FoodItem>   – Dinner
+      //     سناك     : array<FoodItem>   – Snack
+      //   water      : number   – cups consumed (0-20)
+      //   updatedAt  : timestamp
+      //
+      // FoodItem:
+      //   id         : number | string
+      //   name       : string
+      //   nameEn     : string   (optional)
+      //   calories   : number
+      //   protein    : number   (g)
+      //   carbs      : number   (g)
+      //   fat        : number   (g)
+      //   quantity   : number   (multiplier, > 0)
+      //   serving    : string   (optional, e.g. "طبق (400g)")
+      //   addedAt    : timestamp (optional)
+
+      match /days/{date} {
+        allow read:   if isOwner(uid);
+        allow write:  if isOwner(uid)
+                      && request.resource.data.keys().hasAll(['meals','water','updatedAt'])
+                      && request.resource.data.water is number
+                      && request.resource.data.water >= 0
+                      && request.resource.data.water <= 20
+                      && request.resource.data.meals is map
+                      && request.resource.data.meals.keys().hasAll(['فطور','غداء','عشاء','سناك']);
+        allow delete: if isOwner(uid);
+      }
+    }
+
+    // ─── /foods/{foodId} ─────────────────────────────────────────────────────
+    // Global read-only food catalogue (populated by admin/seed script).
+    //
+    // Schema:
+    //   id       : number   – sequential ID
+    //   name     : string   – Arabic name
+    //   nameEn   : string   – English name
+    //   calories : number   – per serving
+    //   protein  : number   – grams per serving
+    //   carbs    : number   – grams per serving
+    //   fat      : number   – grams per serving
+    //   serving  : string   – description (e.g. "طبق (400g)")
+    //   category : string   – e.g. "main", "breakfast", "snack", "dessert"
+    //   tags     : array<string>  (optional)
+
+    match /foods/{foodId} {
+      allow read:  if request.auth != null;   // any authenticated user
+      allow write: if false;                  // admin SDK only
+    }
+
+    // Block all other paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لياقتك — System Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --green:  #16a34a; --green-l: #22c55e; --green-bg: #f0fdf4;
+      --blue:   #2563eb; --blue-l:  #3b82f6; --blue-bg:  #eff6ff;
+      --purple: #7c3aed; --purple-l:#8b5cf6; --purple-bg:#f5f3ff;
+      --amber:  #d97706; --amber-l: #f59e0b; --amber-bg: #fffbeb;
+      --red:    #dc2626; --red-l:   #ef4444; --red-bg:   #fef2f2;
+      --slate:  #64748b; --border: #e2e8f0; --text: #0f172a;
+    }
+    body { font-family: 'Tajawal', sans-serif; background: #f8fafc; color: var(--text); }
+    code, .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* NAV */
+    header {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .header-logo { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .header-badge { background: var(--green-bg); color: var(--green); font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; border: 1px solid #bbf7d0; }
+    .header-right { display: flex; gap: 16px; align-items: center; }
+    .back-link { font-size: 13px; color: var(--slate); text-decoration: none; font-weight: 600; padding: 6px 14px; border: 1px solid var(--border); border-radius: 8px; transition: all 0.2s; }
+    .back-link:hover { background: var(--green-bg); color: var(--green); border-color: #bbf7d0; }
+
+    /* LAYOUT */
+    main { max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px; }
+    section { margin-bottom: 48px; }
+    h2 { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    h2 .h2-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+    h3 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+
+    /* HERO */
+    .hero { text-align: center; padding: 40px 24px 32px; margin-bottom: 40px; }
+    .hero h1 { font-size: 34px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+    .hero p { font-size: 16px; color: var(--slate); max-width: 560px; margin: 0 auto; }
+    .hero-meta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; border: 1px solid; }
+    .badge-green  { background: var(--green-bg);  color: var(--green);  border-color: #bbf7d0; }
+    .badge-blue   { background: var(--blue-bg);   color: var(--blue);   border-color: #bfdbfe; }
+    .badge-purple { background: var(--purple-bg); color: var(--purple); border-color: #ddd6fe; }
+    .badge-amber  { background: var(--amber-bg);  color: var(--amber);  border-color: #fde68a; }
+    .badge-red    { background: var(--red-bg);    color: var(--red);    border-color: #fecaca; }
+
+    /* ARCHITECTURE DIAGRAM */
+    .arch-diagram {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+    }
+    .arch-layer {
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 0;
+      position: relative;
+    }
+    .arch-layer-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      opacity: 0.7;
+    }
+    .arch-layer.client   { background: #f0fdf4; border: 1.5px solid #bbf7d0; }
+    .arch-layer.backend  { background: #eff6ff; border: 1.5px solid #bfdbfe; }
+    .arch-layer.data     { background: #f5f3ff; border: 1.5px solid #ddd6fe; }
+    .arch-layer.external { background: #fffbeb; border: 1.5px solid #fde68a; }
+
+    .arch-arrow {
+      text-align: center;
+      padding: 8px 0;
+      font-size: 22px;
+      color: var(--slate);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .arch-arrow span { font-size: 12px; font-weight: 600; color: var(--slate); font-family: 'JetBrains Mono', monospace; }
+
+    .layer-boxes { display: flex; gap: 12px; flex-wrap: wrap; }
+    .layer-box {
+      flex: 1;
+      min-width: 120px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+    }
+    .layer-box .box-icon { font-size: 18px; margin-bottom: 6px; }
+    .layer-box .box-name { font-weight: 700; color: var(--text); font-size: 13px; }
+    .layer-box .box-desc { font-size: 11px; color: var(--slate); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+
+    /* API TABLE */
+    .api-group { margin-bottom: 28px; }
+    .api-group-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .api-prefix {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: #f1f5f9;
+      padding: 2px 10px;
+      border-radius: 6px;
+      color: var(--slate);
+      border: 1px solid var(--border);
+    }
+    .api-table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .api-table th { background: #f8fafc; font-size: 12px; font-weight: 700; color: var(--slate); padding: 10px 16px; text-align: right; border-bottom: 1px solid var(--border); }
+    .api-table td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .api-table tr:last-child td { border-bottom: none; }
+    .method {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      width: 54px;
+      text-align: center;
+    }
+    .method-GET    { background: var(--green-bg);  color: var(--green);  border: 1px solid #bbf7d0; }
+    .method-POST   { background: var(--blue-bg);   color: var(--blue);   border: 1px solid #bfdbfe; }
+    .method-PUT    { background: var(--amber-bg);  color: var(--amber);  border: 1px solid #fde68a; }
+    .method-DELETE { background: var(--red-bg);    color: var(--red);    border: 1px solid #fecaca; }
+    .endpoint-path { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--blue); }
+    .auth-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .auth-tag.protected { background: var(--amber-bg); color: var(--amber); border: 1px solid #fde68a; }
+    .auth-tag.public    { background: #f1f5f9; color: var(--slate); border: 1px solid var(--border); }
+    .auth-tag.ai        { background: var(--purple-bg); color: var(--purple); border: 1px solid #ddd6fe; }
+
+    /* FIRESTORE SCHEMA */
+    .schema-tree {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      font-family: 'JetBrains Mono', monospace;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .schema-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+      padding: 10px 20px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 13px;
+    }
+    .schema-row:last-child { border-bottom: none; }
+    .schema-row.collection { background: #f8fafc; font-weight: 700; }
+    .schema-row.document   { padding-right: 40px; }
+    .schema-row.field      { padding-right: 64px; color: var(--slate); }
+    .schema-row.subfield   { padding-right: 88px; color: var(--slate); }
+    .schema-key   { color: var(--blue); min-width: 200px; }
+    .schema-type  { color: var(--purple); margin-right: 8px; font-size: 11px; }
+    .schema-note  { color: var(--slate); font-size: 11px; }
+    .schema-icon  { margin-left: 8px; font-size: 14px; }
+
+    /* TECH STACK */
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .stack-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .stack-card-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .tech-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #f1f5f9; }
+    .tech-item:last-child { border-bottom: none; }
+    .tech-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .tech-role { font-size: 12px; color: var(--slate); }
+
+    /* SECURITY */
+    .security-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .security-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .security-card-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .security-item { font-size: 13px; color: var(--slate); padding: 5px 0; border-bottom: 1px solid #f8fafc; display: flex; align-items: flex-start; gap: 8px; }
+    .security-item:last-child { border-bottom: none; }
+    .security-item::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+    /* DATA FLOW */
+    .flow-steps { display: flex; gap: 0; overflow-x: auto; padding-bottom: 8px; }
+    .flow-step {
+      flex: 1;
+      min-width: 140px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 16px 14px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .flow-step:first-child { border-radius: 12px 0 0 12px; }
+    .flow-step:last-child  { border-radius: 0 12px 12px 0; }
+    .flow-step + .flow-step { border-right: none; }
+    .flow-step::after {
+      content: '→';
+      position: absolute;
+      left: -14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      color: var(--slate);
+      z-index: 1;
+    }
+    .flow-step:first-child::after { display: none; }
+    .flow-step .step-icon { font-size: 24px; margin-bottom: 6px; }
+    .flow-step .step-name { font-size: 13px; font-weight: 700; color: var(--text); }
+    .flow-step .step-detail { font-size: 11px; color: var(--slate); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+    @media (max-width: 900px) {
+      .stack-grid { grid-template-columns: 1fr; }
+      .security-grid { grid-template-columns: 1fr; }
+      .layer-boxes { flex-direction: column; }
+    }
+    @media (max-width: 600px) {
+      main { padding: 20px 12px 60px; }
+      header { padding: 0 16px; }
+      .hero h1 { font-size: 24px; }
+      .api-table { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">🔥 لياقتك <span class="header-badge">System Architecture</span></div>
+  <div class="header-right">
+    <a href="index.html" class="back-link">← الرئيسية</a>
+  </div>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>معمارية نظام لياقتك</h1>
+    <p>توثيق تقني شامل لمكونات التطبيق، تدفق البيانات، نقاط الـ API، وهيكل قاعدة البيانات</p>
+    <div class="hero-meta">
+      <span class="badge badge-green">🟢 Vanilla JS Frontend</span>
+      <span class="badge badge-blue">🔵 Node.js / Express</span>
+      <span class="badge badge-purple">🟣 Firebase Firestore</span>
+      <span class="badge badge-amber">🟡 JWT Auth</span>
+      <span class="badge badge-red">🔴 OpenRouter AI</span>
+    </div>
+  </div>
+
+  <!-- 1. SYSTEM OVERVIEW DIAGRAM -->
+  <section>
+    <h2>
+      <span class="h2-num" style="background:var(--green-bg);color:var(--green)">1</span>
+      نظرة عامة على النظام
+    </h2>
+    <div class="arch-diagram">
+
+      <!-- CLIENT LAYER -->
+      <div class="arch-layer client">
+        <div class="arch-layer-label">🖥️ Client Layer — المتصفح</div>
+        <div class="layer-boxes">
+          <div class="layer-box">
+            <div class="box-icon">🔐</div>
+            <div class="box-name">login.html</div>
+            <div class="box-desc">تسجيل دخول / إنشاء حساب</div>
+          </div>
+          <div class="layer-box">
+            <div class="box-icon">👤</div>
+            <div class="box-name">profile.html</div>
+            <div class="box-desc">بيانات المستخدم + حساب السعرات</div>
+          </div>
+          <div class="layer-box">
+            <div class="box-icon">🏠</div>
+            <div class="box-name">index.html</div>
+            <div class="box-desc">Dashboard + تسجيل الوجبات</div>
+          </div>
+          <div class="layer-box">
+            <div class="box-icon">📊</div>
+            <div class="box-name">progress.html</div>
+            <div class="box-desc">التقدم + التحليل الأسبوعي</div>
+          </div>
+          <div class="layer-box" style="background:#f8fafc;border-style:dashed">
+            <div class="box-icon">📐</div>
+            <div class="box-name">architecture.html</div>
+            <div class="box-desc">هذه الصفحة — توثيق النظام</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arch-arrow">↕<span>HTTP / REST (JSON) — Authorization: Bearer JWT</span>↕</div>
+
+      <!-- BACKEND LAYER -->
+      <div class="arch-layer backend">
+        <div class="arch-layer-label">⚙️ Backend Layer — Node.js / Express :3001</div>
+        <div class="layer-boxes">
+          <div class="layer-box" style="background:var(--blue-bg);border-color:#bfdbfe">
+            <div class="box-icon">🛡️</div>
+            <div class="box-name">Middleware</div>
+            <div class="box-desc">Helmet · CORS · Rate Limiter · JWT Auth</div>
+          </div>
+          <div class="layer-box">
+            <div class="box-icon">🔑</div>
+            <div class="box-name">/api/auth</div>
+            <div class="box-desc">login · register · profile</div>
+          </div>
+          <div class="layer-box">
+            <div class="box-icon">🍎</div>
+            <div class="box-name">/api/food</div>
+            <div class="box-desc">search · log · stats</div>
+          </div>
+          <div class="layer-box">
+            <div class="box-icon">🤖</div>
+            <div class="box-name">/api/ai</div>
+            <div class="box-desc">image analyze (proxy)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arch-arrow">↕<span>Firebase Admin SDK (gRPC)</span>↕ &nbsp;&nbsp;&nbsp;&nbsp; ↕<span>HTTPS REST</span>↕</div>
+
+      <!-- DATA + EXTERNAL -->
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
+        <div class="arch-layer data">
+          <div class="arch-layer-label">🗄️ Data Layer — Firebase / Firestore</div>
+          <div class="layer-boxes">
+            <div class="layer-box" style="background:var(--purple-bg);border-color:#ddd6fe">
+              <div class="box-icon">👥</div>
+              <div class="box-name">users/</div>
+              <div class="box-desc">profile · goals · days/{date}</div>
+            </div>
+            <div class="layer-box" style="background:var(--purple-bg);border-color:#ddd6fe">
+              <div class="box-icon">🥗</div>
+              <div class="box-name">foods/</div>
+              <div class="box-desc">70 صنف · USDA data · per 100g</div>
+            </div>
+          </div>
+        </div>
+        <div class="arch-layer external" style="margin-bottom:0">
+          <div class="arch-layer-label">🌐 External APIs</div>
+          <div class="layer-box" style="margin-bottom:10px">
+            <div class="box-icon">🤖</div>
+            <div class="box-name">OpenRouter</div>
+            <div class="box-desc">qwen2.5-vl-72b · تحليل صور الطعام</div>
+          </div>
+          <div class="layer-box">
+            <div class="box-icon">🌍</div>
+            <div class="box-name">Google Fonts</div>
+            <div class="box-desc">Tajawal (Arabic font)</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 2. DATA FLOW -->
+  <section>
+    <h2>
+      <span class="h2-num" style="background:var(--blue-bg);color:var(--blue)">2</span>
+      تدفق البيانات — سيناريوهات رئيسية
+    </h2>
+
+    <h3 style="margin-bottom:12px">📝 تسجيل وجبة جديدة</h3>
+    <div class="flow-steps" style="margin-bottom:24px">
+      <div class="flow-step"><div class="step-icon">🔍</div><div class="step-name">بحث عن طعام</div><div class="step-detail">GET /api/food/search</div></div>
+      <div class="flow-step"><div class="step-icon">⚖️</div><div class="step-name">إدخال الجرام</div><div class="step-detail">حساب محلي (×/100)</div></div>
+      <div class="flow-step"><div class="step-icon">✅</div><div class="step-name">إضافة للوجبة</div><div class="step-detail">state في الذاكرة</div></div>
+      <div class="flow-step"><div class="step-icon">💾</div><div class="step-name">حفظ تلقائي</div><div class="step-detail">POST /api/food/log/:date</div></div>
+      <div class="flow-step"><div class="step-icon">🗄️</div><div class="step-name">Firestore</div><div class="step-detail">users/{uid}/days/{date}</div></div>
+    </div>
+
+    <h3 style="margin-bottom:12px">🔑 تسجيل دخول المستخدم</h3>
+    <div class="flow-steps" style="margin-bottom:24px">
+      <div class="flow-step"><div class="step-icon">📧</div><div class="step-name">بريد + كلمة مرور</div><div class="step-detail">POST /api/auth/login</div></div>
+      <div class="flow-step"><div class="step-icon">🔥</div><div class="step-name">Firebase Auth</div><div class="step-detail">التحقق من البيانات</div></div>
+      <div class="flow-step"><div class="step-icon">🎫</div><div class="step-name">JWT Token</div><div class="step-detail">7 أيام صلاحية</div></div>
+      <div class="flow-step"><div class="step-icon">💾</div><div class="step-name">localStorage</div><div class="step-detail">layaqtek_token</div></div>
+      <div class="flow-step"><div class="step-icon">🏠</div><div class="step-name">Redirect</div><div class="step-detail">index.html أو profile.html</div></div>
+    </div>
+
+    <h3 style="margin-bottom:12px">📸 تحليل صورة بالذكاء الاصطناعي</h3>
+    <div class="flow-steps">
+      <div class="flow-step"><div class="step-icon">📷</div><div class="step-name">رفع صورة</div><div class="step-detail">base64 في المتصفح</div></div>
+      <div class="flow-step"><div class="step-icon">🔒</div><div class="step-name">Backend Proxy</div><div class="step-detail">POST /api/ai/analyze</div></div>
+      <div class="flow-step"><div class="step-icon">🤖</div><div class="step-name">OpenRouter API</div><div class="step-detail">qwen2.5-vl-72b</div></div>
+      <div class="flow-step"><div class="step-icon">📋</div><div class="step-name">JSON Response</div><div class="step-detail">foods[] + totalCalories</div></div>
+      <div class="flow-step"><div class="step-icon">➕</div><div class="step-name">إضافة للوجبة</div><div class="step-detail">state + Firestore</div></div>
+    </div>
+  </section>
+
+  <!-- 3. API ENDPOINTS -->
+  <section>
+    <h2>
+      <span class="h2-num" style="background:var(--amber-bg);color:var(--amber)">3</span>
+      API Endpoints
+    </h2>
+
+    <!-- AUTH -->
+    <div class="api-group">
+      <div class="api-group-title">🔑 Authentication <code class="api-prefix">/api/auth</code></div>
+      <table class="api-table">
+        <tr><th>Method</th><th>Endpoint</th><th>الوصف</th><th>Auth</th></tr>
+        <tr>
+          <td><span class="method method-GET">GET</span></td>
+          <td class="endpoint-path">/api/health</td>
+          <td>فحص حالة الخادم</td>
+          <td><span class="auth-tag public">عام</span></td>
+        </tr>
+        <tr>
+          <td><span class="method method-POST">POST</span></td>
+          <td class="endpoint-path">/api/auth/register</td>
+          <td>إنشاء حساب جديد → JWT token</td>
+          <td><span class="auth-tag public">عام</span></td>
+        </tr>
+        <tr>
+          <td><span class="method method-POST">POST</span></td>
+          <td class="endpoint-path">/api/auth/login</td>
+          <td>تسجيل دخول → JWT token + user data</td>
+          <td><span class="auth-tag public">عام</span></td>
+        </tr>
+        <tr>
+          <td><span class="method method-PUT">PUT</span></td>
+          <td class="endpoint-path">/api/auth/profile</td>
+          <td>حفظ البيانات الجسدية + حساب TDEE + أهداف الماكروز</td>
+          <td><span class="auth-tag protected">🔐 JWT</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- FOOD -->
+    <div class="api-group">
+      <div class="api-group-title">🍎 Food <code class="api-prefix">/api/food</code></div>
+      <table class="api-table">
+        <tr><th>Method</th><th>Endpoint</th><th>الوصف</th><th>Auth</th></tr>
+        <tr>
+          <td><span class="method method-GET">GET</span></td>
+          <td class="endpoint-path">/api/food/search?q=</td>
+          <td>بحث في قاعدة الأطعمة (عربي / إنجليزي / فئة)</td>
+          <td><span class="auth-tag protected">🔐 JWT</span></td>
+        </tr>
+        <tr>
+          <td><span class="method method-GET">GET</span></td>
+          <td class="endpoint-path">/api/food/all</td>
+          <td>كل الأطعمة مرتبة بالفئة — 70 صنف</td>
+          <td><span class="auth-tag protected">🔐 JWT</span></td>
+        </tr>
+        <tr>
+          <td><span class="method method-GET">GET</span></td>
+          <td class="endpoint-path">/api/food/log/:date</td>
+          <td>سجل يوم محدد (YYYY-MM-DD)</td>
+          <td><span class="auth-tag protected">🔐 JWT</span></td>
+        </tr>
+        <tr>
+          <td><span class="method method-POST">POST</span></td>
+          <td class="endpoint-path">/api/food/log/:date</td>
+          <td>حفظ سجل اليوم (وجبات + ماء)</td>
+          <td><span class="auth-tag protected">🔐 JWT</span></td>
+        </tr>
+        <tr>
+          <td><span class="method method-GET">GET</span></td>
+          <td class="endpoint-path">/api/food/stats?days=</td>
+          <td>إحصاءات N يوم — streak · ماكروز · أكثر الأطعمة</td>
+          <td><span class="auth-tag protected">🔐 JWT</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- AI -->
+    <div class="api-group">
+      <div class="api-group-title">🤖 AI <code class="api-prefix">/api/ai</code></div>
+      <table class="api-table">
+        <tr><th>Method</th><th>Endpoint</th><th>الوصف</th><th>Auth</th></tr>
+        <tr>
+          <td><span class="method method-POST">POST</span></td>
+          <td class="endpoint-path">/api/ai/analyze</td>
+          <td>تحليل صورة طعام → foods[] + macros (OpenRouter proxy)</td>
+          <td><span class="auth-tag ai">🔐 JWT + Rate Limit</span></td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4. FIRESTORE SCHEMA -->
+  <section>
+    <h2>
+      <span class="h2-num" style="background:var(--purple-bg);color:var(--purple)">4</span>
+      هيكل قاعدة البيانات — Firestore
+    </h2>
+    <div class="schema-tree">
+      <!-- users -->
+      <div class="schema-row collection"><span class="schema-icon">📁</span><span class="schema-key">users/</span><span class="schema-note">— collection</span></div>
+      <div class="schema-row document"><span class="schema-icon">📄</span><span class="schema-key">{uid}/</span><span class="schema-note">— Firebase Auth UID</span></div>
+      <div class="schema-row field"><span class="schema-key">name</span><span class="schema-type">string</span><span class="schema-note">الاسم الكامل</span></div>
+      <div class="schema-row field"><span class="schema-key">email</span><span class="schema-type">string</span></div>
+      <div class="schema-row field"><span class="schema-key">createdAt</span><span class="schema-type">ISO string</span></div>
+      <div class="schema-row field"><span class="schema-key">profile{}</span><span class="schema-type">object</span></div>
+      <div class="schema-row subfield"><span class="schema-key">gender</span><span class="schema-type">male | female</span></div>
+      <div class="schema-row subfield"><span class="schema-key">age</span><span class="schema-type">number</span></div>
+      <div class="schema-row subfield"><span class="schema-key">weight</span><span class="schema-type">number</span><span class="schema-note">kg</span></div>
+      <div class="schema-row subfield"><span class="schema-key">height</span><span class="schema-type">number</span><span class="schema-note">cm</span></div>
+      <div class="schema-row subfield"><span class="schema-key">activityLevel</span><span class="schema-type">sedentary | light | moderate | active | veryActive</span></div>
+      <div class="schema-row subfield"><span class="schema-key">goal</span><span class="schema-type">lose | maintain | gain</span></div>
+      <div class="schema-row field"><span class="schema-key">goals{}</span><span class="schema-type">object</span><span class="schema-note">— يُحسب من Mifflin-St Jeor × TDEE</span></div>
+      <div class="schema-row subfield"><span class="schema-key">calories</span><span class="schema-type">number</span><span class="schema-note">الهدف اليومي</span></div>
+      <div class="schema-row subfield"><span class="schema-key">protein / carbs / fat</span><span class="schema-type">number</span><span class="schema-note">g/day — 30%/40%/30%</span></div>
+      <div class="schema-row subfield"><span class="schema-key">water</span><span class="schema-type">number</span><span class="schema-note">أكواب (افتراضي 8)</span></div>
+      <div class="schema-row subfield"><span class="schema-key">profileComplete</span><span class="schema-type">boolean</span><span class="schema-note">يحدد Redirect بعد Login</span></div>
+
+      <!-- days sub-collection -->
+      <div class="schema-row document" style="margin-right:20px"><span class="schema-icon">📁</span><span class="schema-key">days/</span><span class="schema-note">— sub-collection</span></div>
+      <div class="schema-row" style="padding-right:88px"><span class="schema-icon">📄</span><span class="schema-key">{YYYY-MM-DD}/</span><span class="schema-note">— سجل يوم واحد</span></div>
+      <div class="schema-row" style="padding-right:112px"><span class="schema-key">meals{}</span><span class="schema-type">object</span></div>
+      <div class="schema-row" style="padding-right:136px"><span class="schema-key">فطور | غداء | عشاء | سناك</span><span class="schema-type">array</span></div>
+      <div class="schema-row" style="padding-right:160px"><span class="schema-key">[ { name, calories, protein, carbs, fat, grams, sugar, fiber } ]</span></div>
+      <div class="schema-row" style="padding-right:112px"><span class="schema-key">water</span><span class="schema-type">number</span><span class="schema-note">عدد الأكواب</span></div>
+      <div class="schema-row" style="padding-right:112px"><span class="schema-key">updatedAt</span><span class="schema-type">ISO string</span></div>
+
+      <!-- foods -->
+      <div class="schema-row collection" style="margin-top:4px"><span class="schema-icon">📁</span><span class="schema-key">foods/</span><span class="schema-note">— collection · 70 document (seeded once)</span></div>
+      <div class="schema-row document"><span class="schema-icon">📄</span><span class="schema-key">{autoId}/</span></div>
+      <div class="schema-row field"><span class="schema-key">name / nameEn / category</span><span class="schema-type">string</span></div>
+      <div class="schema-row field"><span class="schema-key">calories / protein / carbs / fat / sugar / fiber</span><span class="schema-type">number</span><span class="schema-note">per 100g — USDA FoodData Central</span></div>
+      <div class="schema-row field"><span class="schema-key">vitamins{}</span><span class="schema-type">object</span><span class="schema-note">vitC, vitA, vitD, vitB12, vitB6, vitE, folate...</span></div>
+      <div class="schema-row field"><span class="schema-key">minerals{}</span><span class="schema-type">object</span><span class="schema-note">calcium, iron, magnesium, potassium, zinc...</span></div>
+      <div class="schema-row field"><span class="schema-key">serving / servingWeight</span><span class="schema-type">string / number(g)</span><span class="schema-note">الحصة الافتراضية</span></div>
+      <div class="schema-row field"><span class="schema-key">source</span><span class="schema-type">string</span><span class="schema-note">USDA FDC ID أو "تقدير مركب"</span></div>
+    </div>
+  </section>
+
+  <!-- 5. TECH STACK -->
+  <section>
+    <h2>
+      <span class="h2-num" style="background:#fef3c7;color:var(--amber)">5</span>
+      التقنيات المستخدمة
+    </h2>
+    <div class="stack-grid">
+      <div class="stack-card">
+        <div class="stack-card-title">🖥️ Frontend</div>
+        <div class="tech-item"><span class="tech-name">HTML5 / CSS3</span><span class="tech-role">هيكل وتنسيق</span></div>
+        <div class="tech-item"><span class="tech-name">Vanilla JavaScript (ES6+)</span><span class="tech-role">لا framework</span></div>
+        <div class="tech-item"><span class="tech-name">Tajawal (Google Fonts)</span><span class="tech-role">خط عربي</span></div>
+        <div class="tech-item"><span class="tech-name">RTL / dir="rtl"</span><span class="tech-role">واجهة عربية</span></div>
+        <div class="tech-item"><span class="tech-name">localStorage</span><span class="tech-role">JWT + user data</span></div>
+        <div class="tech-item"><span class="tech-name">CSS Custom Properties</span><span class="tech-role">Design system</span></div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-card-title">⚙️ Backend</div>
+        <div class="tech-item"><span class="tech-name">Node.js v22</span><span class="tech-role">Runtime</span></div>
+        <div class="tech-item"><span class="tech-name">Express.js</span><span class="tech-role">HTTP Framework</span></div>
+        <div class="tech-item"><span class="tech-name">firebase-admin SDK</span><span class="tech-role">Auth + Firestore</span></div>
+        <div class="tech-item"><span class="tech-name">jsonwebtoken (JWT)</span><span class="tech-role">7-day tokens</span></div>
+        <div class="tech-item"><span class="tech-name">express-validator</span><span class="tech-role">Input validation</span></div>
+        <div class="tech-item"><span class="tech-name">helmet + cors</span><span class="tech-role">Security headers</span></div>
+        <div class="tech-item"><span class="tech-name">express-rate-limit</span><span class="tech-role">Rate limiting</span></div>
+        <div class="tech-item"><span class="tech-name">dotenv</span><span class="tech-role">Environment vars</span></div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-card-title">☁️ Infrastructure & Services</div>
+        <div class="tech-item"><span class="tech-name">Firebase Firestore</span><span class="tech-role">NoSQL Database</span></div>
+        <div class="tech-item"><span class="tech-name">Firebase Auth</span><span class="tech-role">User management</span></div>
+        <div class="tech-item"><span class="tech-name">OpenRouter API</span><span class="tech-role">AI Vision (proxy)</span></div>
+        <div class="tech-item"><span class="tech-name">qwen/qwen2.5-vl-72b</span><span class="tech-role">Food image analysis</span></div>
+        <div class="tech-item"><span class="tech-name">USDA FoodData Central</span><span class="tech-role">Nutrition data source</span></div>
+        <div class="tech-item"><span class="tech-name">VS Code Live Server</span><span class="tech-role">Dev: localhost:5500</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. SECURITY -->
+  <section>
+    <h2>
+      <span class="h2-num" style="background:var(--red-bg);color:var(--red)">6</span>
+      طبقات الأمان
+    </h2>
+    <div class="security-grid">
+      <div class="security-card">
+        <div class="security-card-title">🔐 Authentication & Authorization</div>
+        <div class="security-item">JWT tokens بصلاحية 7 أيام — يتجدد عند كل تسجيل دخول</div>
+        <div class="security-item">كل endpoint محمي يتطلب <code>Authorization: Bearer &lt;token&gt;</code></div>
+        <div class="security-item">Firebase Admin SDK يتحقق من صحة token قبل كل طلب</div>
+        <div class="security-item">401 تلقائي يعيد التوجيه لصفحة تسجيل الدخول</div>
+        <div class="security-item">كلمات المرور تُدار بالكامل عبر Firebase Auth (لا تُخزن في Firestore)</div>
+      </div>
+      <div class="security-card">
+        <div class="security-card-title">🛡️ API Security</div>
+        <div class="security-item">Helmet.js يضيف 14 HTTP security header تلقائياً</div>
+        <div class="security-item">CORS مقيّد: localhost:5500, 5501, 3000 فقط في dev</div>
+        <div class="security-item">Rate limiter عام: 100 طلب / 15 دقيقة لكل IP</div>
+        <div class="security-item">AI endpoint rate limit منفصل (عدد محدود / ساعة)</div>
+        <div class="security-item">express-validator يتحقق من كل input قبل المعالجة</div>
+      </div>
+      <div class="security-card">
+        <div class="security-card-title">🔑 Secrets Management</div>
+        <div class="security-item">مفتاح OpenRouter لا يُكشف للـ frontend — كل طلبات AI تمر عبر الـ backend</div>
+        <div class="security-item">Firebase credentials في .env فقط — غير موجودة في الكود</div>
+        <div class="security-item">JWT secret في .env</div>
+        <div class="security-item">ملف .env مدرج في .gitignore</div>
+      </div>
+      <div class="security-card">
+        <div class="security-card-title">📊 Data Isolation</div>
+        <div class="security-item">كل مستخدم يصل فقط لبياناته — UID من JWT token</div>
+        <div class="security-item">Firestore rules: كل وثيقة مؤمّنة بـ uid المستخدم</div>
+        <div class="security-item">حجم الصور محدود بـ 10MB في الـ backend وفي Express body parser</div>
+        <div class="security-item">SQL injection غير ممكن — Firestore SDK, لا raw queries</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. NUTRITION CALCULATION -->
+  <section>
+    <h2>
+      <span class="h2-num" style="background:#fce7f3;color:#be185d">7</span>
+      خوارزمية حساب السعرات
+    </h2>
+    <div style="background:white;border:1px solid var(--border);border-radius:16px;padding:24px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:2;box-shadow:0 1px 4px rgba(0,0,0,0.04)">
+      <div style="color:var(--slate);margin-bottom:12px;font-family:'Tajawal',sans-serif;font-weight:700">Mifflin-St Jeor BMR Formula:</div>
+      <div style="color:var(--blue)">// ذكر</div>
+      <div>BMR = 10 × weight(kg) + 6.25 × height(cm) − 5 × age + 5</div>
+      <br/>
+      <div style="color:var(--blue)">// أنثى</div>
+      <div>BMR = 10 × weight(kg) + 6.25 × height(cm) − 5 × age − 161</div>
+      <br/>
+      <div style="color:var(--blue)">// TDEE — Total Daily Energy Expenditure</div>
+      <div>TDEE = BMR × activityMultiplier</div>
+      <div style="color:var(--slate)">  sedentary: ×1.2 | light: ×1.375 | moderate: ×1.55 | active: ×1.725 | veryActive: ×1.9</div>
+      <br/>
+      <div style="color:var(--blue)">// هدف السعرات</div>
+      <div>targetCalories = max(1200, TDEE + goalAdjustment)</div>
+      <div style="color:var(--slate)">  lose: −500 | maintain: 0 | gain: +300</div>
+      <br/>
+      <div style="color:var(--blue)">// توزيع الماكروز</div>
+      <div>protein = round(targetCalories × 0.30 / 4)  <span style="color:var(--slate)">// 30%</span></div>
+      <div>carbs   = round(targetCalories × 0.40 / 4)  <span style="color:var(--slate)">// 40%</span></div>
+      <div>fat     = round(targetCalories × 0.30 / 9)  <span style="color:var(--slate)">// 30%</span></div>
+    </div>
+  </section>
+
+</main>
+
+</body>
+</html>

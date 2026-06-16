@@ -1,0 +1,10 @@
+{
+  "name": "layaqtek",
+  "version": "1.0.0",
+  "description": "تطبيق تتبع السعرات الحرارية للسوق السعودي",
+  "scripts": {
+    "start": "cd backend && node server.js",
+    "dev": "cd backend && node server.js",
+    "install:backend": "cd backend && npm install"
+  }
+}
