@@ -18,9 +18,13 @@
       --text-muted: #64748b;
       --border: #e2e8f0;
       --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.05);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
       --protein-color: #2563eb;
       --carbs-color: #d97706;
       --fat-color: #dc2626;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
     }
     body {
       font-family: 'Tajawal', sans-serif;
@@ -32,8 +36,10 @@
 
     /* NAV */
     .navbar {
-      background: #ffffff;
-      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(226,232,240,0.6);
       padding: 0 24px;
       height: 64px;
       display: flex;
@@ -42,8 +48,21 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
     }
+    .nav-link {
+      padding: 8px 16px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: var(--primary);
+      border-radius: 8px;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .nav-link:hover { background: #dcfce7; box-shadow: 0 2px 8px rgba(22,163,74,0.15); }
     .nav-logo {
       display: flex;
       align-items: center;
@@ -88,6 +107,11 @@
       border-radius: 20px;
       padding: 24px;
       box-shadow: var(--shadow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
     }
     .card-title {
       font-size: 16px;
@@ -114,7 +138,7 @@
       transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
       filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.35));
     }
-    .ring-progress.over-limit { stroke: #ef4444; filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.4)); }
+    .ring-progress.over-limit { stroke: var(--danger); filter: drop-shadow(0 0 6px rgba(220, 38, 38, 0.4)); }
     .ring-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
     .ring-calories { font-size: 36px; font-weight: 800; color: var(--text); line-height: 1; }
     .ring-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
@@ -177,7 +201,20 @@
 
     /* MEALS */
     .meals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-    .meal-card { background: white; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
+    .meal-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      animation: fadeInUp 0.4s ease both;
+      transition: box-shadow 0.2s ease;
+    }
+    .meal-card:hover { box-shadow: var(--shadow-md); }
+    .meal-card:nth-child(1) { animation-delay: 0ms; }
+    .meal-card:nth-child(2) { animation-delay: 80ms; }
+    .meal-card:nth-child(3) { animation-delay: 160ms; }
+    .meal-card:nth-child(4) { animation-delay: 240ms; }
     .meal-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.2s; user-select: none; }
     .meal-header:hover { background: #f8fafc; }
     .meal-title { display: flex; align-items: center; gap: 10px; }
@@ -227,7 +264,32 @@
       transition: all 0.2s;
     }
     .remove-food-btn:hover { background: #fee2e2; }
-    .empty-meal { text-align: center; color: var(--text-muted); font-size: 13px; padding: 16px 0; }
+    .empty-meal {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 24px 16px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .empty-meal svg { width: 38px; height: 38px; opacity: 0.3; }
+    .empty-meal p { font-size: 13px; margin: 0; }
+    .empty-meal-btn {
+      margin-top: 4px;
+      padding: 6px 18px;
+      border-radius: 20px;
+      background: var(--primary-bg);
+      color: var(--primary);
+      border: 1px solid #bbf7d0;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .empty-meal-btn:hover { background: #dcfce7; }
+    .food-item-new { animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
 
     /* AI */
     .ai-section { margin-bottom: 20px; }
@@ -345,8 +407,8 @@
       box-shadow: 0 20px 60px rgba(0,0,0,0.14);
     }
     @keyframes modalIn {
-      from { opacity: 0; transform: scale(0.96) translateY(8px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
+      from { opacity: 0; transform: translateY(24px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0)   scale(1); }
     }
     .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
     .modal-title { font-size: 18px; font-weight: 700; color: var(--text); }
@@ -574,9 +636,9 @@
     .edit-goals-btn:hover { background: var(--primary-bg); color: var(--primary); }
 
     /* TOAST */
-    .toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+    .toast-container { position: fixed; bottom: 24px; left: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
     .toast {
-      padding: 12px 24px;
+      padding: 12px 20px;
       border-radius: 12px;
       font-size: 14px;
       font-weight: 600;
@@ -584,13 +646,72 @@
       animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
       pointer-events: none;
       white-space: nowrap;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .toast-success { background: #16a34a; }
-    .toast-error { background: #dc2626; }
-    .toast-info { background: #0284c7; }
-    @keyframes toastIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-    @keyframes toastOut { to { opacity:0; transform:translateY(20px); } }
+    .toast-success { background: linear-gradient(135deg, #16a34a, #15803d); }
+    .toast-error   { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+    .toast-info    { background: linear-gradient(135deg, #0284c7, #0369a1); }
+    .toast-success::before { content: '✓'; font-size: 16px; font-weight: 800; }
+    .toast-error::before   { content: '✕'; font-size: 16px; font-weight: 800; }
+    .toast-info::before    { content: 'ℹ'; font-size: 16px; font-weight: 800; }
+    @keyframes toastIn  { from { opacity:0; transform:translateX(-16px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes toastOut { to   { opacity:0; transform:translateX(-16px); } }
+
+    /* GLOBAL KEYFRAMES */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes popIn {
+      0%   { transform: scale(0.82); opacity: 0; }
+      70%  { transform: scale(1.04); }
+      100% { transform: scale(1);    opacity: 1; }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -600px 0; }
+      100% { background-position:  600px 0; }
+    }
+
+    /* SKELETON */
+    .skeleton-line {
+      height: 14px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+      background-size: 600px 100%;
+      animation: shimmer 1.4s infinite;
+      margin-bottom: 10px;
+    }
+    .skeleton-line.short { width: 55%; }
+    .skeleton-line.full  { width: 100%; }
+    .skeleton-meal-body { padding: 16px 20px; }
+
+    /* FLOATING ACTION BUTTON */
+    .fab {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-light), var(--primary));
+      color: white;
+      font-size: 30px;
+      line-height: 1;
+      border: none;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 18px rgba(22,163,74,0.45);
+      z-index: 500;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      font-family: 'Tajawal', sans-serif;
+    }
+    .fab:hover { transform: scale(1.1); box-shadow: 0 6px 22px rgba(22,163,74,0.55); }
+    @media (max-width: 600px) { .fab { display: flex; } }
 
     /* RESPONSIVE */
     @media (max-width: 900px) {
@@ -601,6 +722,25 @@
       .main-content { padding: 16px 12px; }
       .navbar { padding: 0 16px; }
       .card { padding: 16px; }
+      /* Bottom sheet modals on mobile */
+      .modal-overlay {
+        align-items: flex-end;
+        padding: 0;
+      }
+      .modal {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 20px 20px 0 0;
+        max-height: 92vh;
+        animation: slideUpSheet 0.35s cubic-bezier(0.34,1.1,0.64,1) both;
+      }
+      /* Larger touch targets */
+      .water-cup { min-width: 44px; min-height: 44px; }
+      .add-food-btn { width: 36px; height: 36px; font-size: 20px; }
+    }
+    @keyframes slideUpSheet {
+      from { transform: translateY(60px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
     }
   </style>
 </head>
@@ -613,7 +753,7 @@
     </div>
     <div class="nav-right">
       <div class="nav-user">مرحباً، <strong id="navUserName">...</strong></div>
-      <a href="progress.html" style="padding:8px 16px;background:#f0fdf4;border:1px solid #bbf7d0;color:var(--primary);border-radius:8px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">📊 التقدم</a>
+      <a href="progress.html" class="nav-link">📊 التقدم</a>
       <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
     </div>
   </nav>
@@ -747,6 +887,9 @@
       </div>
     </div>
   </main>
+
+  <!-- FLOATING ACTION BUTTON (mobile only) -->
+  <button class="fab" onclick="openAddFood({stopPropagation:()=>{}}, 'غداء')" aria-label="إضافة طعام">+</button>
 
   <!-- GOALS EDIT MODAL -->
   <div class="modal-overlay" id="goalsModal">

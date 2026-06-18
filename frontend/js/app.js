@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   setArabicDate();
   renderWaterCups();
-  renderMeals();
+  renderMealSkeletons();
 
   // Show personalized goals
   const ringGoal = document.getElementById('ringGoal');
@@ -76,6 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (err) {
     console.warn('Could not load log:', err.message);
   }
+  renderMeals();
 
   // Load foods for local search
   try {
@@ -204,6 +205,30 @@ function updateWater(delta) {
   scheduleSave();
 }
 
+// ── Skeleton loader for meal cards while data loads ───────────────────────────
+function renderMealSkeletons() {
+  const grid = document.getElementById('mealsGrid');
+  if (!grid) return;
+  grid.innerHTML = MEAL_TYPES.map((mealType) => `
+    <div class="meal-card" style="animation-delay:${MEAL_TYPES.indexOf(mealType) * 80}ms">
+      <div class="meal-header" style="cursor:default">
+        <div class="meal-title">
+          <span class="meal-icon">${MEAL_ICONS[mealType]}</span>
+          <span class="meal-name">${mealType}</span>
+        </div>
+        <div class="meal-actions">
+          <span class="meal-cal-badge">— سعرة</span>
+        </div>
+      </div>
+      <div class="meal-body open">
+        <div class="skeleton-meal-body">
+          <div class="skeleton-line full"></div>
+          <div class="skeleton-line short"></div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
 // ── Render meal sections ──────────────────────────────────────────────────────
 function renderMeals() {
   const grid = document.getElementById('mealsGrid');
@@ -243,13 +268,20 @@ function renderMeals() {
 function renderMealItems(mealType) {
   const items = state.meals[mealType] || [];
   if (items.length === 0) {
-    return '<div class="empty-meal">لا توجد أطعمة مضافة</div>';
+    return `<div class="empty-meal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2m0 14v2M5 12H3m18 0h-2M7.05 7.05 5.636 5.636m12.728 12.728L16.95 16.95M7.05 16.95l-1.414 1.414M18.364 5.636 16.95 7.05"/>
+        <circle cx="12" cy="12" r="4"/>
+      </svg>
+      <p>لا توجد وجبات بعد</p>
+      <button class="empty-meal-btn" onclick="openAddFood({stopPropagation:()=>{}}, '${mealType}')">+ إضافة طعام</button>
+    </div>`;
   }
 
   return items
     .map(
       (item, index) => `
-    <div class="food-item">
+    <div class="food-item${index === items.length - 1 ? ' food-item-new' : ''}">
       <div class="food-item-info">
         <div class="food-item-name">${item.name}</div>
         <div class="food-item-meta">
@@ -300,19 +332,34 @@ document.getElementById('foodModal').addEventListener('click', (e) => {
   if (e.target === document.getElementById('foodModal')) closeModal();
 });
 
+// Escape key closes any open modal
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('foodModal')?.classList.contains('open'))  closeModal();
+  if (document.getElementById('goalsModal')?.classList.contains('open')) closeGoalsModal();
+});
+
+let _searchDebounceTimer = null;
 function searchFoods(query) {
-  const q = query.trim().toLowerCase();
-  if (!q) {
-    renderFoodResults(allFoods.slice(0, 25));
-    return;
+  clearTimeout(_searchDebounceTimer);
+  const container = document.getElementById('modalResults');
+  if (container && query.trim()) {
+    container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:14px;">جارٍ البحث...</div>';
   }
-  const results = allFoods.filter(
-    (f) =>
-      f.name.includes(query.trim()) ||
-      (f.nameEn && f.nameEn.toLowerCase().includes(q)) ||
-      (f.category && f.category.includes(query.trim()))
-  );
-  renderFoodResults(results);
+  _searchDebounceTimer = setTimeout(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) {
+      renderFoodResults(allFoods.slice(0, 25));
+      return;
+    }
+    const results = allFoods.filter(
+      (f) =>
+        f.name.includes(query.trim()) ||
+        (f.nameEn && f.nameEn.toLowerCase().includes(q)) ||
+        (f.category && f.category.includes(query.trim()))
+    );
+    renderFoodResults(results);
+  }, 300);
 }
 
 // Returns per-serving calories for display in results list
@@ -326,7 +373,7 @@ function renderFoodResults(foods) {
   if (!container) return;
 
   if (foods.length === 0) {
-    container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:14px;">لا توجد نتائج</div>';
+    container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:32px 24px;font-size:14px;">🔍<br><br>لا توجد نتائج<br><span style="font-size:12px">جرب كلمة مختلفة</span></div>';
     return;
   }
 
