@@ -7,11 +7,9 @@ import authMiddleware from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Helper to generate JWT
+// Helper to generate JWT — no expiresIn means the token never expires
 const generateToken = (uid, email, name) => {
-  return jwt.sign({ uid, email, name }, process.env.JWT_SECRET, {
-    expiresIn: '7d',
-  });
+  return jwt.sign({ uid, email, name }, process.env.JWT_SECRET);
 };
 
 // POST /api/auth/register

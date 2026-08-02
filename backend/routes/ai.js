@@ -6,7 +6,7 @@ import { aiLimiter } from '../middleware/rateLimiter.js';
 const router = express.Router();
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const MODEL = 'qwen/qwen2.5-vl-72b-instruct:free';
+const MODEL = 'nvidia/nemotron-nano-12b-v2-vl:free';
 
 // POST /api/ai/analyze (protected, aiLimiter)
 router.post(
@@ -40,28 +40,37 @@ router.post(
     const prompt = `You are a nutrition expert specialized in Arabic and Saudi food.
 Analyze this image and identify all visible food items.
 Count estimated Calories and Macros (protein, carbs, fat) for each item based on visible portions.
-Reply with valid JSON only, no extra text before or after.
 
-Required format:
+Reply with ONLY a single valid JSON object — no markdown, no comments, no text before or after.
+
+STRICT language rule: every "name", "quantity", and "message" value MUST be written in plain,
+standard Modern Standard Arabic (Arabic script only). Never mix in English, French, or any other
+language or random symbols inside these values. Keep food names short and simple — the common
+everyday Arabic name (e.g. "أرز", "دجاج مشوي", "تفاح"), not a long description.
+
+Example of a correctly formatted reply:
 {
   "foods": [
-    {
-      "name": "اسم الطعام بالعربية",
-      "calories": 000,
-      "protein": 0,
-      "carbs": 0,
-      "fat": 0,
-      "quantity": "وصف الكمية المرئية"
-    }
+    { "name": "أرز أبيض", "calories": 200, "protein": 4, "carbs": 44, "fat": 1, "quantity": "كوب واحد" },
+    { "name": "دجاج مشوي", "calories": 250, "protein": 30, "carbs": 0, "fat": 12, "quantity": "قطعة صدر" }
   ],
-  "totalCalories": 000,
-  "message": "وصف قصير للوجبة بالعربية"
+  "totalCalories": 450,
+  "message": "طبق أرز مع دجاج مشوي"
+}
+
+Required JSON shape (same as the example above):
+{
+  "foods": [
+    { "name": "string", "calories": number, "protein": number, "carbs": number, "fat": number, "quantity": "string" }
+  ],
+  "totalCalories": number,
+  "message": "string"
 }
 
 Rules:
-- Name foods in Arabic
 - Be accurate based on visible portion sizes
-- If food is unidentifiable, write "طعام غير محدد"`;
+- If a food item is unidentifiable, name it "طعام غير محدد"
+- Double-check the JSON is valid before replying: matching braces/brackets, quoted keys, no trailing commas`;
 
     try {
       const response = await fetch(OPENROUTER_API_URL, {
@@ -105,10 +114,13 @@ Rules:
         analysisResult = JSON.parse(cleaned);
       } catch {
         const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          analysisResult = JSON.parse(jsonMatch[0]);
-        } else {
-          throw new Error('لم يتمكن الذكاء الاصطناعي من تحليل الصورة');
+        try {
+          analysisResult = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+        } catch {
+          analysisResult = null;
+        }
+        if (!analysisResult) {
+          throw new Error('تعذر تحليل الصورة، يرجى المحاولة مرة أخرى بصورة أوضح');
         }
       }
 

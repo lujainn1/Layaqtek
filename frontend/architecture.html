@@ -225,35 +225,38 @@
     .security-item::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
 
     /* DATA FLOW */
-    .flow-steps { display: flex; gap: 0; overflow-x: auto; padding-bottom: 8px; }
-    .flow-step {
+    .flow-title { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .flow-title .flow-title-icon {
+      width: 30px; height: 30px; border-radius: 9px; background: var(--blue-bg);
+      display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0;
+    }
+    .flow-row { display: flex; align-items: stretch; gap: 6px; margin-bottom: 32px; flex-wrap: wrap; }
+    .flow-node {
       flex: 1;
       min-width: 140px;
       background: white;
       border: 1px solid var(--border);
-      border-radius: 0;
+      border-radius: 14px;
       padding: 16px 14px;
       text-align: center;
-      position: relative;
       box-shadow: 0 1px 4px rgba(0,0,0,0.04);
     }
-    .flow-step:first-child { border-radius: 12px 0 0 12px; }
-    .flow-step:last-child  { border-radius: 0 12px 12px 0; }
-    .flow-step + .flow-step { border-right: none; }
-    .flow-step::after {
-      content: '→';
-      position: absolute;
-      left: -14px;
-      top: 50%;
-      transform: translateY(-50%);
+    .flow-node .node-icon { font-size: 24px; margin-bottom: 6px; }
+    .flow-node .node-title { font-size: 13px; font-weight: 700; color: var(--text); }
+    .flow-node .node-detail { font-size: 11px; color: var(--slate); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+    .flow-connector {
+      flex: 0 0 auto;
+      width: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 18px;
-      color: var(--slate);
-      z-index: 1;
+      color: #cbd5e1;
     }
-    .flow-step:first-child::after { display: none; }
-    .flow-step .step-icon { font-size: 24px; margin-bottom: 6px; }
-    .flow-step .step-name { font-size: 13px; font-weight: 700; color: var(--text); }
-    .flow-step .step-detail { font-size: 11px; color: var(--slate); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+    @media (max-width: 900px) {
+      .flow-row { flex-direction: column; }
+      .flow-connector { width: auto; height: 22px; transform: rotate(-90deg); }
+    }
 
     @media (max-width: 900px) {
       .stack-grid { grid-template-columns: 1fr; }
@@ -284,8 +287,8 @@
     <h1>معمارية نظام لياقتك</h1>
     <p>توثيق تقني شامل لمكونات التطبيق، تدفق البيانات، نقاط الـ API، وهيكل قاعدة البيانات</p>
     <div class="hero-meta">
-      <span class="badge badge-green">🟢 Vanilla JS Frontend</span>
-      <span class="badge badge-blue">🔵 Node.js / Express</span>
+      <span class="badge badge-blue">⚛️ React + Vite</span>
+      <span class="badge badge-green">🟢 Node.js / Express</span>
       <span class="badge badge-purple">🟣 Firebase Firestore</span>
       <span class="badge badge-amber">🟡 JWT Auth</span>
       <span class="badge badge-red">🔴 OpenRouter AI</span>
@@ -302,32 +305,27 @@
 
       <!-- CLIENT LAYER -->
       <div class="arch-layer client">
-        <div class="arch-layer-label">🖥️ Client Layer — المتصفح</div>
+        <div class="arch-layer-label">⚛️ Client Layer — React + Vite — <code class="mono" style="font-size:11px;opacity:0.8">frontend-react/</code></div>
         <div class="layer-boxes">
           <div class="layer-box">
             <div class="box-icon">🔐</div>
-            <div class="box-name">login.html</div>
+            <div class="box-name">Login</div>
             <div class="box-desc">تسجيل دخول / إنشاء حساب</div>
           </div>
           <div class="layer-box">
             <div class="box-icon">👤</div>
-            <div class="box-name">profile.html</div>
-            <div class="box-desc">بيانات المستخدم + حساب السعرات</div>
+            <div class="box-name">ProfileSetup</div>
+            <div class="box-desc">4 خطوات — حساب TDEE والماكروز</div>
           </div>
           <div class="layer-box">
             <div class="box-icon">🏠</div>
-            <div class="box-name">index.html</div>
-            <div class="box-desc">Dashboard + تسجيل الوجبات</div>
+            <div class="box-name">Dashboard</div>
+            <div class="box-desc">السعرات · الماكروز · الوجبات · الماء</div>
           </div>
           <div class="layer-box">
             <div class="box-icon">📊</div>
-            <div class="box-name">progress.html</div>
-            <div class="box-desc">التقدم + التحليل الأسبوعي</div>
-          </div>
-          <div class="layer-box" style="background:#f8fafc;border-style:dashed">
-            <div class="box-icon">📐</div>
-            <div class="box-name">architecture.html</div>
-            <div class="box-desc">هذه الصفحة — توثيق النظام</div>
+            <div class="box-name">Progress</div>
+            <div class="box-desc">تحليل 7/14/30 يوم</div>
           </div>
         </div>
       </div>
@@ -405,31 +403,52 @@
       تدفق البيانات — سيناريوهات رئيسية
     </h2>
 
-    <h3 style="margin-bottom:12px">📝 تسجيل وجبة جديدة</h3>
-    <div class="flow-steps" style="margin-bottom:24px">
-      <div class="flow-step"><div class="step-icon">🔍</div><div class="step-name">بحث عن طعام</div><div class="step-detail">GET /api/food/search</div></div>
-      <div class="flow-step"><div class="step-icon">⚖️</div><div class="step-name">إدخال الجرام</div><div class="step-detail">حساب محلي (×/100)</div></div>
-      <div class="flow-step"><div class="step-icon">✅</div><div class="step-name">إضافة للوجبة</div><div class="step-detail">state في الذاكرة</div></div>
-      <div class="flow-step"><div class="step-icon">💾</div><div class="step-name">حفظ تلقائي</div><div class="step-detail">POST /api/food/log/:date</div></div>
-      <div class="flow-step"><div class="step-icon">🗄️</div><div class="step-name">Firestore</div><div class="step-detail">users/{uid}/days/{date}</div></div>
+    <div class="flow-title">
+      <div class="flow-title-icon" style="background:var(--green-bg)">📝</div>
+      <h3 style="margin-bottom:0">تسجيل وجبة جديدة</h3>
+    </div>
+    <div class="flow-row">
+      <div class="flow-node"><div class="node-icon">🔍</div><div class="node-title">بحث عن طعام</div><div class="node-detail">GET /api/food/search</div></div>
+      <div class="flow-connector">←</div>
+      <div class="flow-node"><div class="node-icon">⚖️</div><div class="node-title">إدخال الجرام</div><div class="node-detail">حساب محلي (×/100)</div></div>
+      <div class="flow-connector">←</div>
+      <div class="flow-node"><div class="node-icon">✅</div><div class="node-title">إضافة للوجبة</div><div class="node-detail">React state</div></div>
+      <div class="flow-connector">←</div>
+      <div class="flow-node"><div class="node-icon">💾</div><div class="node-title">حفظ تلقائي</div><div class="node-detail">POST /api/food/log/:date</div></div>
+      <div class="flow-connector">←</div>
+      <div class="flow-node"><div class="node-icon">🗄️</div><div class="node-title">Firestore</div><div class="node-detail">users/{uid}/days/{date}</div></div>
     </div>
 
-    <h3 style="margin-bottom:12px">🔑 تسجيل دخول المستخدم</h3>
-    <div class="flow-steps" style="margin-bottom:24px">
-      <div class="flow-step"><div class="step-icon">📧</div><div class="step-name">بريد + كلمة مرور</div><div class="step-detail">POST /api/auth/login</div></div>
-      <div class="flow-step"><div class="step-icon">🔥</div><div class="step-name">Firebase Auth</div><div class="step-detail">التحقق من البيانات</div></div>
-      <div class="flow-step"><div class="step-icon">🎫</div><div class="step-name">JWT Token</div><div class="step-detail">7 أيام صلاحية</div></div>
-      <div class="flow-step"><div class="step-icon">💾</div><div class="step-name">localStorage</div><div class="step-detail">layaqtek_token</div></div>
-      <div class="flow-step"><div class="step-icon">🏠</div><div class="step-name">Redirect</div><div class="step-detail">index.html أو profile.html</div></div>
+    <div class="flow-title">
+      <div class="flow-title-icon" style="background:var(--amber-bg)">🔑</div>
+      <h3 style="margin-bottom:0">تسجيل دخول المستخدم</h3>
+    </div>
+    <div class="flow-row">
+      <div class="flow-node"><div class="node-icon">📧</div><div class="node-title">بريد + كلمة مرور</div><div class="node-detail">POST /api/auth/login</div></div>
+      <div class="flow-connector">←</div>
+      <div class="flow-node"><div class="node-icon">🔒</div><div class="node-title">التحقق</div><div class="node-detail">Firestore lookup + bcrypt.compare</div></div>
+      <div class="flow-connector">←</div>
+      <div class="flow-node"><div class="node-icon">🎫</div><div class="node-title">توليد JWT</div><div class="node-detail">jsonwebtoken.sign() — بلا انتهاء</div></div>
+      <div class="flow-connector">←</div>
+      <div class="flow-node"><div class="node-icon">💾</div><div class="node-title">حفظ محلي</div><div class="node-detail">localStorage</div></div>
+      <div class="flow-connector">←</div>
+      <div class="flow-node"><div class="node-icon">🏠</div><div class="node-title">توجيه</div><div class="node-detail">Dashboard / ProfileSetup</div></div>
     </div>
 
-    <h3 style="margin-bottom:12px">📸 تحليل صورة بالذكاء الاصطناعي</h3>
-    <div class="flow-steps">
-      <div class="flow-step"><div class="step-icon">📷</div><div class="step-name">رفع صورة</div><div class="step-detail">base64 في المتصفح</div></div>
-      <div class="flow-step"><div class="step-icon">🔒</div><div class="step-name">Backend Proxy</div><div class="step-detail">POST /api/ai/analyze</div></div>
-      <div class="flow-step"><div class="step-icon">🤖</div><div class="step-name">OpenRouter API</div><div class="step-detail">qwen2.5-vl-72b</div></div>
-      <div class="flow-step"><div class="step-icon">📋</div><div class="step-name">JSON Response</div><div class="step-detail">foods[] + totalCalories</div></div>
-      <div class="flow-step"><div class="step-icon">➕</div><div class="step-name">إضافة للوجبة</div><div class="step-detail">state + Firestore</div></div>
+    <div class="flow-title">
+      <div class="flow-title-icon" style="background:var(--purple-bg)">📸</div>
+      <h3 style="margin-bottom:0">تحليل صورة بالذكاء الاصطناعي</h3>
+    </div>
+    <div class="flow-row" style="margin-bottom:0">
+      <div class="flow-node"><div class="node-icon">📷</div><div class="node-title">رفع صورة</div><div class="node-detail">base64 في المتصفح</div></div>
+      <div class="flow-connector">←</div>
+      <div class="flow-node"><div class="node-icon">🔒</div><div class="node-title">Backend Proxy</div><div class="node-detail">POST /api/ai/analyze</div></div>
+      <div class="flow-connector">←</div>
+      <div class="flow-node"><div class="node-icon">🤖</div><div class="node-title">OpenRouter API</div><div class="node-detail">qwen2.5-vl-72b</div></div>
+      <div class="flow-connector">←</div>
+      <div class="flow-node"><div class="node-icon">📋</div><div class="node-title">نتيجة JSON</div><div class="node-detail">foods[] + macros</div></div>
+      <div class="flow-connector">←</div>
+      <div class="flow-node"><div class="node-icon">➕</div><div class="node-title">إضافة للوجبة</div><div class="node-detail">React state + Firestore</div></div>
     </div>
   </section>
 
@@ -580,12 +599,13 @@
     </h2>
     <div class="stack-grid">
       <div class="stack-card">
-        <div class="stack-card-title">🖥️ Frontend</div>
-        <div class="tech-item"><span class="tech-name">HTML5 / CSS3</span><span class="tech-role">هيكل وتنسيق</span></div>
-        <div class="tech-item"><span class="tech-name">Vanilla JavaScript (ES6+)</span><span class="tech-role">لا framework</span></div>
+        <div class="stack-card-title">⚛️ Frontend</div>
+        <div class="tech-item"><span class="tech-name">React 18</span><span class="tech-role">UI components</span></div>
+        <div class="tech-item"><span class="tech-name">Vite</span><span class="tech-role">Dev server + bundler</span></div>
+        <div class="tech-item"><span class="tech-name">react-router-dom v6</span><span class="tech-role">Client-side routing</span></div>
+        <div class="tech-item"><span class="tech-name">Context API</span><span class="tech-role">Toast notifications</span></div>
         <div class="tech-item"><span class="tech-name">Tajawal (Google Fonts)</span><span class="tech-role">خط عربي</span></div>
         <div class="tech-item"><span class="tech-name">RTL / dir="rtl"</span><span class="tech-role">واجهة عربية</span></div>
-        <div class="tech-item"><span class="tech-name">localStorage</span><span class="tech-role">JWT + user data</span></div>
         <div class="tech-item"><span class="tech-name">CSS Custom Properties</span><span class="tech-role">Design system</span></div>
       </div>
       <div class="stack-card">
@@ -620,7 +640,7 @@
     <div class="security-grid">
       <div class="security-card">
         <div class="security-card-title">🔐 Authentication & Authorization</div>
-        <div class="security-item">JWT tokens بصلاحية 7 أيام — يتجدد عند كل تسجيل دخول</div>
+        <div class="security-item">JWT tokens بدون انتهاء صلاحية — الجلسة تبقى حتى تسجيل الخروج يدوياً</div>
         <div class="security-item">كل endpoint محمي يتطلب <code>Authorization: Bearer &lt;token&gt;</code></div>
         <div class="security-item">Firebase Admin SDK يتحقق من صحة token قبل كل طلب</div>
         <div class="security-item">401 تلقائي يعيد التوجيه لصفحة تسجيل الدخول</div>
