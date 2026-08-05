@@ -3,12 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   apiGetLog, apiSaveLog, apiGetAllFoods, clearAuth, getUser,
 } from '../api';
-import { getTodayString } from '../utils/goals';
+import { getTodayString, addDaysToDateString, parseDateString } from '../utils/goals';
 import { useToast } from '../context/ToastContext';
 import MealCard from '../components/MealCard';
 import FoodModal from '../components/FoodModal';
 import GoalsModal from '../components/GoalsModal';
 import AiAnalyzer from '../components/AiAnalyzer';
+import ThemeToggle from '../components/ThemeToggle';
 
 const MEAL_TYPES = ['فطور', 'غداء', 'عشاء', 'سناك'];
 const ML_PER_CUP = 250;
@@ -31,38 +32,51 @@ export default function Dashboard() {
   const [lastAdded, setLastAdded] = useState({});
 
   const todayDate = getTodayString();
+  const [selectedDate, setSelectedDate] = useState(todayDate);
+  const isToday = selectedDate === todayDate;
 
   useEffect(() => {
-    (async () => {
-      try {
-        const log = await apiGetLog(todayDate);
-        if (log) {
-          setMeals({
-            فطور: log.meals?.فطور || [],
-            غداء: log.meals?.غداء || [],
-            عشاء: log.meals?.عشاء || [],
-            سناك: log.meals?.سناك || [],
-          });
-          setWater(log.water || 0);
-        }
-      } catch (err) {
-        if (err.message === 'جلسة منتهية') return;
-        console.warn('Could not load log:', err.message);
-      }
-      try {
-        const data = await apiGetAllFoods();
-        setAllFoods(data.foods || []);
-      } catch { /* ignore, search will just show empty results */ }
-      setLoading(false);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    apiGetAllFoods()
+      .then((data) => setAllFoods(data.foods || []))
+      .catch(() => { /* ignore, search will just show empty results */ });
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    apiGetLog(selectedDate)
+      .then((log) => {
+        if (cancelled || !log) return;
+        setMeals({
+          فطور: log.meals?.فطور || [],
+          غداء: log.meals?.غداء || [],
+          عشاء: log.meals?.عشاء || [],
+          سناك: log.meals?.سناك || [],
+        });
+        setWater(log.water || 0);
+      })
+      .catch((err) => {
+        if (cancelled || err.message === 'جلسة منتهية') return;
+        console.warn('Could not load log:', err.message);
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [selectedDate]);
+
   function persist(nextMeals, nextWater) {
-    apiSaveLog(todayDate, nextMeals, nextWater).catch((err) => {
+    apiSaveLog(selectedDate, nextMeals, nextWater).catch((err) => {
       showToast(`تعذر الحفظ: ${err.message}`, 'error');
     });
   }
+
+  function changeDate(nextDate) {
+    setModalMeal(null);
+    setLastAdded({});
+    setSelectedDate(nextDate);
+  }
+  const goToPreviousDay = () => changeDate(addDaysToDateString(selectedDate, -1));
+  const goToNextDay = () => changeDate(addDaysToDateString(selectedDate, 1));
+  const goToToday = () => changeDate(todayDate);
 
   const totals = useMemo(() => {
     let calories = 0, protein = 0, carbs = 0, fat = 0;
@@ -137,15 +151,25 @@ export default function Dashboard() {
         <div className="nav-right">
           <div className="nav-user">مرحباً، <strong>{user?.name || 'المستخدم'}</strong></div>
           <Link to="/progress" className="nav-link">📊 <span className="nav-progress-text">التقدم</span></Link>
+          <ThemeToggle />
           <button className="logout-btn" onClick={logout}>تسجيل الخروج</button>
         </div>
       </nav>
 
       <main className="main-content">
         <div className="date-header">
-          <h2>سجل اليوم</h2>
-          <div className="date-text">
-            {new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          <h2>السجل الغذائي</h2>
+          <div className="date-nav">
+            <button className="date-nav-btn" onClick={goToPreviousDay} aria-label="اليوم السابق">‹</button>
+            <div className="date-nav-current">
+              <div className="date-text">
+                {parseDateString(selectedDate).toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </div>
+              {!isToday && (
+                <button className="date-today-btn" onClick={goToToday}>العودة لليوم</button>
+              )}
+            </div>
+            <button className="date-nav-btn" onClick={goToNextDay} disabled={isToday} aria-label="اليوم التالي">›</button>
           </div>
         </div>
 
@@ -228,8 +252,8 @@ export default function Dashboard() {
                     onClick={() => toggleCup(i)}
                   >
                     <svg viewBox="0 0 40 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M8 10 L6 46 H34 L32 10 Z" fill={i < water ? '#3498db' : 'rgba(0,0,0,0.05)'} stroke={i < water ? '#2980b9' : 'rgba(0,0,0,0.1)'} strokeWidth="2" />
-                      <path d="M8 10 L32 10" stroke={i < water ? '#5dade2' : 'rgba(0,0,0,0.08)'} strokeWidth="2" />
+                      <path className={`water-cup-fill ${i < water ? 'filled' : ''}`} d="M8 10 L6 46 H34 L32 10 Z" strokeWidth="2" />
+                      <path className={`water-cup-top ${i < water ? 'filled' : ''}`} d="M8 10 L32 10" strokeWidth="2" />
                     </svg>
                   </div>
                 ))}

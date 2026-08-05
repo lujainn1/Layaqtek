@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiGetStats, getUser } from '../api';
+import ThemeToggle from '../components/ThemeToggle';
 
 const DAY_NAMES = ['أحد', 'اثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت'];
 const DEFAULT_GOALS = { calories: 2000, protein: 150, carbs: 250, fat: 65, water: 8 };
@@ -33,16 +34,19 @@ export default function Progress() {
     <div>
       <nav className="navbar">
         <Link to="/" className="nav-logo"><span>🔥</span>لياقتك</Link>
-        <div className="period-tabs">
-          {[7, 14, 30].map((d) => (
-            <button
-              key={d}
-              className={`period-tab ${days === d ? 'active' : ''}`}
-              onClick={() => setDays(d)}
-            >
-              {d} أيام
-            </button>
-          ))}
+        <div className="nav-right">
+          <div className="period-tabs">
+            {[7, 14, 30].map((d) => (
+              <button
+                key={d}
+                className={`period-tab ${days === d ? 'active' : ''}`}
+                onClick={() => setDays(d)}
+              >
+                {d} أيام
+              </button>
+            ))}
+          </div>
+          <ThemeToggle />
         </div>
       </nav>
 

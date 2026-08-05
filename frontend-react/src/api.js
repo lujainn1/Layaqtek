@@ -47,9 +47,9 @@ async function apiFetch(path, options = {}) {
 
   const response = await fetch(`${BASE_URL}${path}`, { ...options, headers });
 
-  if (response.status === 401) {
+  if (response.status === 401 && token) {
     clearAuth();
-    window.location.href = '/login';
+    window.location.hash = '/login';
     throw new Error('جلسة منتهية');
   }
 
@@ -66,6 +66,12 @@ export const apiLogin = (email, password) =>
 
 export const apiRegister = (name, email, password) =>
   apiFetch('/api/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password }) });
+
+export const apiForgotPassword = (email) =>
+  apiFetch('/api/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) });
+
+export const apiResetPassword = (email, token, password) =>
+  apiFetch('/api/auth/reset-password', { method: 'POST', body: JSON.stringify({ email, token, password }) });
 
 export const apiSaveProfile = (gender, age, weight, height, activityLevel, goal) =>
   apiFetch('/api/auth/profile', {

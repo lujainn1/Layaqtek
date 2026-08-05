@@ -3,9 +3,9 @@ import { apiUpdateGoals, updateStoredUser } from '../api';
 import { KCAL_PER_G } from '../utils/goals';
 
 const MACROS = [
-  ['protein', '#2563eb', 'البروتين'],
-  ['carbs', '#d97706', 'الكربوهيدرات'],
-  ['fat', '#dc2626', 'الدهون'],
+  ['protein', 'var(--protein-color)', 'البروتين'],
+  ['carbs', 'var(--carbs-color)', 'الكربوهيدرات'],
+  ['fat', 'var(--fat-color)', 'الدهون'],
 ];
 
 export default function GoalsModal({ goals, onClose, onSaved }) {

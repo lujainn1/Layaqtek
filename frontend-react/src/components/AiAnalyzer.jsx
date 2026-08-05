@@ -114,7 +114,7 @@ export default function AiAnalyzer({ onAddFoods }) {
               </div>
             ))}
             {result.message && (
-              <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8, padding: '8px 12px', background: '#f8fafc', borderRadius: 8 }}>
+              <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8, padding: '8px 12px', background: 'var(--surface-alt)', borderRadius: 8 }}>
                 {result.message}
               </div>
             )}

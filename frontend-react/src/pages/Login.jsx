@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { apiLogin, apiRegister, saveAuth } from '../api';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ export default function Login() {
 
   return (
     <div className="auth-page">
+      <ThemeToggle className="theme-toggle-fixed" />
       <div className="auth-container">
         <div className="auth-logo">
           <div className="emoji">🔥</div>
@@ -121,6 +123,14 @@ export default function Login() {
               )}
             </button>
           </form>
+
+          {isLogin && (
+            <div className="auth-link-row">
+              <Link className="auth-link" to="/forgot-password">
+                نسيت كلمة المرور؟
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className="auth-features">

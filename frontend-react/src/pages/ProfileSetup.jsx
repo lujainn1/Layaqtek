@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiSaveProfile, updateStoredUser } from '../api';
 import { calculateGoals } from '../utils/goals';
+import ThemeToggle from '../components/ThemeToggle';
 
 const ACTIVITIES = [
   ['sedentary', '🪑', 'خامل', 'عمل مكتبي، بدون رياضة'],
@@ -69,6 +70,7 @@ export default function ProfileSetup() {
 
   return (
     <div className="setup-page">
+      <ThemeToggle className="theme-toggle-fixed" />
       <div className="setup-container">
         <div className="setup-logo">
           <div className="emoji">🔥</div>

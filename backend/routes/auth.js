@@ -1,11 +1,16 @@
 import express from 'express';
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { body, validationResult } from 'express-validator';
 import { db } from '../server.js';
 import authMiddleware from '../middleware/auth.js';
+import { passwordResetLimiter } from '../middleware/rateLimiter.js';
+import { sendPasswordResetEmail } from '../utils/mailer.js';
 
 const router = express.Router();
+
+const hashToken = (token) => crypto.createHash('sha256').update(token).digest('hex');
 
 // Helper to generate JWT — no expiresIn means the token never expires
 const generateToken = (uid, email, name) => {
@@ -152,6 +157,124 @@ router.post(
     } catch (err) {
       console.error('Login error:', err);
       res.status(500).json({ error: 'حدث خطأ أثناء تسجيل الدخول' });
+    }
+  }
+);
+
+// POST /api/auth/forgot-password
+router.post(
+  '/forgot-password',
+  passwordResetLimiter,
+  [
+    body('email')
+      .trim()
+      .notEmpty()
+      .withMessage('البريد الإلكتروني مطلوب')
+      .isEmail()
+      .withMessage('البريد الإلكتروني غير صالح')
+      .normalizeEmail(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0].msg });
+    }
+
+    const { email } = req.body;
+    const genericMessage = 'إذا كان البريد الإلكتروني مسجلاً لدينا، سنرسل رابط إعادة تعيين كلمة المرور';
+
+    try {
+      const usersRef = db.collection('users');
+      const userQuery = await usersRef.where('email', '==', email).limit(1).get();
+
+      if (!userQuery.empty) {
+        const userDoc = userQuery.docs[0];
+        const rawToken = crypto.randomBytes(32).toString('hex');
+
+        await userDoc.ref.update({
+          resetTokenHash: hashToken(rawToken),
+          resetTokenExpiry: Date.now() + 60 * 60 * 1000, // 1 hour
+        });
+
+        const resetLink = `${process.env.FRONTEND_URL}/#/reset-password?token=${rawToken}&email=${encodeURIComponent(email)}`;
+
+        try {
+          await sendPasswordResetEmail(email, resetLink);
+        } catch (mailErr) {
+          console.error('Password reset email error:', mailErr);
+        }
+      }
+
+      // Always respond the same way, whether or not the email exists, to avoid leaking account info
+      res.json({ message: genericMessage });
+    } catch (err) {
+      console.error('Forgot password error:', err);
+      res.status(500).json({ error: 'حدث خطأ أثناء معالجة الطلب' });
+    }
+  }
+);
+
+// POST /api/auth/reset-password
+router.post(
+  '/reset-password',
+  passwordResetLimiter,
+  [
+    body('email')
+      .trim()
+      .notEmpty()
+      .withMessage('البريد الإلكتروني مطلوب')
+      .isEmail()
+      .withMessage('البريد الإلكتروني غير صالح')
+      .normalizeEmail(),
+    body('token').notEmpty().withMessage('الرمز غير صالح'),
+    body('password')
+      .notEmpty()
+      .withMessage('كلمة المرور مطلوبة')
+      .isLength({ min: 6 })
+      .withMessage('كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0].msg });
+    }
+
+    const { email, token, password } = req.body;
+    const invalidTokenMessage = 'رابط إعادة التعيين غير صالح أو منتهي الصلاحية، يرجى طلب رابط جديد';
+
+    try {
+      const usersRef = db.collection('users');
+      const userQuery = await usersRef.where('email', '==', email).limit(1).get();
+
+      if (userQuery.empty) {
+        return res.status(400).json({ error: invalidTokenMessage });
+      }
+
+      const userDoc = userQuery.docs[0];
+      const userData = userDoc.data();
+
+      if (
+        !userData.resetTokenHash ||
+        !userData.resetTokenExpiry ||
+        userData.resetTokenExpiry < Date.now() ||
+        userData.resetTokenHash !== hashToken(token)
+      ) {
+        return res.status(400).json({ error: invalidTokenMessage });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      await userDoc.ref.update({
+        password: hashedPassword,
+        resetTokenHash: null,
+        resetTokenExpiry: null,
+        updatedAt: new Date().toISOString(),
+      });
+
+      res.json({ message: 'تم إعادة تعيين كلمة المرور بنجاح' });
+    } catch (err) {
+      console.error('Reset password error:', err);
+      res.status(500).json({ error: 'حدث خطأ أثناء إعادة تعيين كلمة المرور' });
     }
   }
 );
