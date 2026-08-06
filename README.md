@@ -10,3 +10,5 @@ AI-assisted calorie &amp; macro tracking for Arabic-speaking users + progress an
 Features a 70+ food database sourced from USDA FoodData Central, AI-powered food image analysis,
 7-day progress analytics, customizable macro goals, and water intake tracking.
 Built with  React + Vite, Node.js / Express,  Firebase Firestore, fully RTL.
+
+layaqtek.vercel.app
