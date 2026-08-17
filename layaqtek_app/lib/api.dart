@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,11 +6,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// All backend API calls — mirrors frontend/js/api.js.
 /// The backend itself is unchanged (Node.js/Express on port 3001).
 class Api {
-  /// Android emulator reaches your PC's localhost via 10.0.2.2.
+  /// Android emulator reaches your PC's localhost via 10.0.2.2 (the default
+  /// below). Override at build/run time without editing this file:
+  ///   flutter run --dart-define=API_BASE_URL=http://localhost:3001
   /// For a physical phone on the same Wi-Fi, use your PC's local IP
   /// e.g. 'http://192.168.1.10:3001' (run `ipconfig` to find it).
   /// For the deployed backend use 'https://your-project.vercel.app'.
-  static const String baseUrl = 'http://10.0.2.2:3001';
+  static const String baseUrl =
+      String.fromEnvironment('API_BASE_URL', defaultValue: 'http://10.0.2.2:3001');
 
   // ── Auth storage ──────────────────────────────────────────────
   static Future<void> saveAuth(String token, Map user) async {
@@ -39,7 +43,7 @@ class Api {
 
   // ── Core request wrapper ──────────────────────────────────────
   static Future<dynamic> _request(String method, String path,
-      [Map<String, dynamic>? body]) async {
+      [Map<String, dynamic>? body, Duration timeout = const Duration(seconds: 20)]) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('layaqtek_token');
     final headers = {
@@ -49,13 +53,23 @@ class Api {
     final uri = Uri.parse('$baseUrl$path');
 
     late http.Response res;
-    switch (method) {
-      case 'POST':
-        res = await http.post(uri, headers: headers, body: jsonEncode(body));
-      case 'PUT':
-        res = await http.put(uri, headers: headers, body: jsonEncode(body));
-      default:
-        res = await http.get(uri, headers: headers);
+    try {
+      switch (method) {
+        case 'POST':
+          res = await http
+              .post(uri, headers: headers, body: jsonEncode(body))
+              .timeout(timeout);
+        case 'PUT':
+          res = await http
+              .put(uri, headers: headers, body: jsonEncode(body))
+              .timeout(timeout);
+        default:
+          res = await http.get(uri, headers: headers).timeout(timeout);
+      }
+    } on TimeoutException {
+      throw Exception('انتهت مهلة الاتصال، يرجى المحاولة مرة أخرى');
+    } on http.ClientException {
+      throw Exception('تعذر الاتصال بالخادم، تحقق من اتصالك بالإنترنت');
     }
 
     if (res.statusCode == 401) {
@@ -78,6 +92,9 @@ class Api {
   static Future<Map> register(String name, String email, String password) async =>
       await _request('POST', '/api/auth/register',
           {'name': name, 'email': email, 'password': password}) as Map;
+
+  static Future<Map> forgotPassword(String email) async =>
+      await _request('POST', '/api/auth/forgot-password', {'email': email}) as Map;
 
   static Future<Map> saveProfile({
     required String gender,
@@ -112,6 +129,12 @@ class Api {
     return (data['foods'] ?? []) as List;
   }
 
+  static Future<List> searchFood(String query) async {
+    final data = await _request(
+        'GET', '/api/food/search?q=${Uri.encodeQueryComponent(query)}') as Map;
+    return (data['foods'] ?? []) as List;
+  }
+
   static Future<Map?> getLog(String date) async =>
       await _request('GET', '/api/food/log/$date') as Map?;
 
@@ -121,4 +144,13 @@ class Api {
 
   static Future<Map> getStats(int days) async =>
       await _request('GET', '/api/food/stats?days=$days') as Map;
+
+  // ── AI endpoints ──────────────────────────────────────────────
+  /// [imageBase64] must NOT include the `data:image/...;base64,` prefix.
+  /// Longer timeout: the backend tries a fallback chain of AI models
+  /// (up to ~30s each) before giving up.
+  static Future<Map> analyzeImage(String imageBase64, String mimeType) async =>
+      await _request('POST', '/api/ai/analyze',
+          {'imageData': imageBase64, 'mimeType': mimeType},
+          const Duration(seconds: 75)) as Map;
 }

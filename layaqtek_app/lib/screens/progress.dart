@@ -41,7 +41,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('📊 التقدم والتحليل')),
+      appBar: AppBar(
+        title: const Text('📊 التقدم والتحليل'),
+        actions: const [ThemeToggleButton()],
+      ),
       body: Column(
         children: [
           // Period tabs
@@ -63,17 +66,17 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
-                        color: active ? kPrimary : Colors.white,
+                        color: active ? kPrimary : kSurface(context),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                            color: active ? kPrimary : const Color(0xFFE2E8F0)),
+                            color: active ? kPrimary : kBorder(context)),
                       ),
                       child: Text('$d أيام',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 13,
-                            color: active ? Colors.white : Colors.grey[700],
+                            color: active ? Colors.white : kTextMuted(context),
                           )),
                     ),
                   ),
@@ -88,7 +91,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 : stats == null
                     ? Center(
                         child: Text('لا توجد بيانات',
-                            style: TextStyle(color: Colors.grey[600])))
+                            style: TextStyle(color: kTextMuted(context))))
                     : ListView(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
                         children: [
@@ -126,18 +129,19 @@ class _ProgressScreenState extends State<ProgressScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: kSurface(context),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(color: kBorder(context)),
         ),
         child: Column(
           children: [
             Text(icon, style: const TextStyle(fontSize: 24)),
             const SizedBox(height: 6),
             Text(value,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                style: TextStyle(
+                    fontSize: 20, fontWeight: FontWeight.w800, color: kText(context))),
             Text(label,
-                style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 11, color: kTextMuted(context)),
                 textAlign: TextAlign.center),
           ],
         ),
@@ -163,7 +167,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               padding: const EdgeInsets.all(20),
               child: Text('لا توجد بيانات بعد',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey[500])),
+                  style: TextStyle(color: kTextMuted(context))),
             )
           : SizedBox(
               height: 160,
@@ -189,7 +193,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           if (cal > 0)
                             Text('${cal.round()}',
                                 style: TextStyle(
-                                    fontSize: 9, color: Colors.grey[600])),
+                                    fontSize: 9, color: kTextMuted(context))),
                           const SizedBox(height: 2),
                           FractionallySizedBox(
                             widthFactor: 1,
@@ -200,7 +204,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                 borderRadius: const BorderRadius.vertical(
                                     top: Radius.circular(6)),
                                 color: cal == 0
-                                    ? const Color(0xFFF1F5F9)
+                                    ? kSurfaceAlt2(context)
                                     : over
                                         ? kDanger
                                         : kPrimaryLight,
@@ -210,7 +214,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           const SizedBox(height: 4),
                           Text(label,
                               style: TextStyle(
-                                  fontSize: 10, color: Colors.grey[600])),
+                                  fontSize: 10, color: kTextMuted(context))),
                         ],
                       ),
                     ),
@@ -253,7 +257,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             Text(name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
             const Spacer(),
             Text('$value / $goal',
-                style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                style: TextStyle(fontSize: 12, color: kTextMuted(context))),
           ],
         ),
         const SizedBox(height: 5),
@@ -262,7 +266,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           child: LinearProgressIndicator(
             value: pct,
             minHeight: 7,
-            backgroundColor: const Color(0xFFF1F5F9),
+            backgroundColor: kSurfaceAlt2(context),
             color: color,
           ),
         ),
@@ -281,7 +285,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               padding: const EdgeInsets.all(12),
               child: Text('لا توجد بيانات بعد',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey[500])),
+                  style: TextStyle(color: kTextMuted(context))),
             )
           : Column(
               children: List.generate(topFoods.length, (i) {
@@ -324,14 +328,16 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kSurface(context),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: kBorder(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+          Text(title,
+              style: TextStyle(
+                  fontSize: 15, fontWeight: FontWeight.w700, color: kText(context))),
           const SizedBox(height: 14),
           child,
         ],

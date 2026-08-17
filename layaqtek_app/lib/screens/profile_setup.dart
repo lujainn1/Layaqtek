@@ -82,8 +82,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: SafeArea(
+      body: Stack(
+        children: [
+          SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -92,12 +93,13 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
               const SizedBox(height: 12),
               const Text('🔥', textAlign: TextAlign.center, style: TextStyle(fontSize: 44)),
               const SizedBox(height: 4),
-              const Text('أخبرنا عنك',
+              Text('أخبرنا عنك',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
+                  style: TextStyle(
+                      fontSize: 26, fontWeight: FontWeight.w800, color: kText(context))),
               Text('لنحسب احتياجك اليومي من السعرات',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+                  style: TextStyle(fontSize: 14, color: kTextMuted(context))),
               const SizedBox(height: 24),
 
               // Progress indicator
@@ -108,7 +110,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       height: 5,
                       margin: const EdgeInsets.symmetric(horizontal: 3),
                       decoration: BoxDecoration(
-                        color: i <= step ? kPrimary : const Color(0xFFE2E8F0),
+                        color: i <= step ? kPrimary : kBorder(context),
                         borderRadius: BorderRadius.circular(99),
                       ),
                     ),
@@ -121,7 +123,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
               Container(
                 padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: kSurface(context),
                   borderRadius: BorderRadius.circular(22),
                   boxShadow: [
                     BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 16),
@@ -181,6 +183,13 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             ],
           ),
         ),
+          ),
+          Positioned(
+            top: 12,
+            left: 12,
+            child: SafeArea(child: ThemeToggleButton()),
+          ),
+        ],
       ),
     );
   }
@@ -249,9 +258,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(vertical: 20),
           decoration: BoxDecoration(
-            color: selected ? kPrimaryBg : Colors.white,
+            color: selected ? kPrimaryBgOf(context) : kSurface(context),
             border: Border.all(
-                color: selected ? kPrimary : const Color(0xFFE2E8F0),
+                color: selected ? kPrimary : kBorder(context),
                 width: selected ? 2 : 1.5),
             borderRadius: BorderRadius.circular(16),
           ),
@@ -262,7 +271,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
               Text(label,
                   style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: selected ? kPrimary : Colors.grey[800])),
+                      color: selected ? kPrimary : kText(context))),
             ],
           ),
         ),
@@ -279,9 +288,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: selected ? kPrimaryBg : Colors.white,
+          color: selected ? kPrimaryBgOf(context) : kSurface(context),
           border: Border.all(
-              color: selected ? kPrimary : const Color(0xFFE2E8F0),
+              color: selected ? kPrimary : kBorder(context),
               width: selected ? 2 : 1.5),
           borderRadius: BorderRadius.circular(14),
         ),
@@ -295,7 +304,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 children: [
                   Text(name, style: const TextStyle(fontWeight: FontWeight.w700)),
                   Text(desc,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                      style: TextStyle(fontSize: 12, color: kTextMuted(context))),
                 ],
               ),
             ),
@@ -315,9 +324,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: selected ? kPrimaryBg : Colors.white,
+          color: selected ? kPrimaryBgOf(context) : kSurface(context),
           border: Border.all(
-              color: selected ? kPrimary : const Color(0xFFE2E8F0),
+              color: selected ? kPrimary : kBorder(context),
               width: selected ? 2 : 1.5),
           borderRadius: BorderRadius.circular(14),
         ),
@@ -328,7 +337,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             Expanded(
                 child: Text(name, style: const TextStyle(fontWeight: FontWeight.w700))),
             Text(adjustment,
-                style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+                style: TextStyle(fontSize: 13, color: kTextMuted(context))),
             if (selected) ...[
               const SizedBox(width: 8),
               const Icon(Icons.check_circle, color: kPrimary),
@@ -345,19 +354,19 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       keyboardType: TextInputType.number,
       textAlign: TextAlign.center,
       onChanged: (_) => setState(() {}),
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: kText(context)),
       decoration: InputDecoration(
         labelText: label,
         suffixText: unit,
         filled: true,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: kSurfaceAlt(context),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: BorderSide(color: kBorder(context)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: BorderSide(color: kBorder(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
