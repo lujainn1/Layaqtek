@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لياقتك — معمارية الجوال</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ── Palette ─────────────────────────────────────────────────────────
+       Light values are the web app's (frontend-react/src/index.css); the
+       dark block uses the mobile app's own dark surfaces from
+       layaqtek_app/lib/main.dart, so this page is themed by the product
+       it documents. */
+    :root {
+      --green:#16a34a; --green-bg:#f0fdf4; --green-br:#bbf7d0;
+      --blue:#2563eb;  --blue-bg:#eff6ff;  --blue-br:#bfdbfe;
+      --purple:#7c3aed;--purple-bg:#f5f3ff;--purple-br:#ddd6fe;
+      --amber:#d97706; --amber-bg:#fffbeb; --amber-br:#fde68a;
+      --red:#dc2626;   --red-bg:#fef2f2;   --red-br:#fecaca;
+      --slate:#64748b; --border:#e2e8f0;   --text:#0f172a;
+      --bg:#f8fafc;    --surface:#ffffff;  --surface-alt:#f1f5f9;
+      --pink:#be185d;  --pink-bg:#fce7f3;
+      --code-bg:#f1f5f9;
+      --shadow:0 1px 4px rgba(0,0,0,.05);
+      --shadow-lg:0 2px 16px rgba(0,0,0,.05);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --green:#22c55e; --green-bg:#16341f; --green-br:#1f5133;
+        --blue:#3b82f6;  --blue-bg:#13213c;  --blue-br:#1e3a6b;
+        --purple:#8b5cf6;--purple-bg:#231b3f;--purple-br:#3b2f70;
+        --amber:#f59e0b; --amber-bg:#32240b; --amber-br:#6b4a12;
+        --red:#ef4444;   --red-bg:#3a1515;   --red-br:#6b2020;
+        --slate:#94a3b8; --border:#2b3a52;   --text:#e2e8f0;
+        --bg:#0b1220;    --surface:#131c2e;  --surface-alt:#1a2436;
+        --pink:#f472b6;  --pink-bg:#3d1526;
+        --code-bg:#1e293b;
+        --shadow:0 1px 4px rgba(0,0,0,.4);
+        --shadow-lg:0 2px 16px rgba(0,0,0,.45);
+      }
+    }
+
+    body {
+      font-family:'Tajawal',sans-serif;
+      background:var(--bg); color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      overflow-x:hidden;
+    }
+    code,.mono { font-family:'JetBrains Mono',monospace; }
+    code {
+      background:var(--code-bg); padding:1px 6px; border-radius:5px;
+      font-size:.88em; direction:ltr; display:inline-block;
+    }
+
+    /* ── Header ── */
+    header {
+      background:var(--surface); border-bottom:1px solid var(--border);
+      padding:10px 20px; min-height:60px; display:flex; align-items:center;
+      justify-content:space-between; gap:12px; flex-wrap:wrap;
+      position:sticky; top:0; z-index:100; box-shadow:var(--shadow);
+    }
+    .header-logo { font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .header-badge {
+      background:var(--green-bg); color:var(--green); font-size:12px; font-weight:700;
+      padding:3px 10px; border-radius:20px; border:1px solid var(--green-br);
+    }
+    .back-link {
+      font-size:13px; color:var(--slate); text-decoration:none; font-weight:600;
+      padding:6px 14px; border:1px solid var(--border); border-radius:8px; transition:all .2s;
+    }
+    .back-link:hover { background:var(--green-bg); color:var(--green); border-color:var(--green-br); }
+
+    /* ── Layout ── */
+    main { max-width:1140px; margin:0 auto; padding:40px 16px 72px; }
+    section { margin-bottom:52px; scroll-margin-top:80px; }
+    h2 {
+      font-size:clamp(19px,4vw,22px); font-weight:800; margin-bottom:18px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .h2-num {
+      width:32px; height:32px; border-radius:50%; display:flex; align-items:center;
+      justify-content:center; font-size:14px; font-weight:700; flex-shrink:0;
+      font-family:'JetBrains Mono',monospace;
+    }
+    h3 { font-size:15px; font-weight:700; margin-bottom:12px; }
+    .lede { color:var(--slate); font-size:14.5px; line-height:1.9; margin-bottom:18px; max-width:860px; }
+    .lede b { color:var(--text); }
+
+    .card {
+      background:var(--surface); border:1px solid var(--border); border-radius:16px;
+      padding:clamp(16px,3vw,22px); box-shadow:var(--shadow); margin-bottom:16px;
+    }
+    .card:last-child { margin-bottom:0; }
+
+    /* ── Hero ── */
+    .hero { text-align:center; padding:44px 16px 30px; margin-bottom:36px; }
+    .hero h1 { font-size:clamp(24px,5.5vw,34px); font-weight:800; margin-bottom:10px; }
+    .hero p { font-size:15.5px; color:var(--slate); max-width:620px; margin:0 auto; line-height:1.85; }
+    .hero-meta { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:22px; }
+    .badge {
+      display:inline-flex; align-items:center; gap:6px; padding:5px 14px; border-radius:20px;
+      font-size:13px; font-weight:700; border:1px solid;
+    }
+    .badge-green { background:var(--green-bg); color:var(--green); border-color:var(--green-br); }
+    .badge-blue  { background:var(--blue-bg);  color:var(--blue);  border-color:var(--blue-br); }
+    .badge-purple{ background:var(--purple-bg);color:var(--purple);border-color:var(--purple-br); }
+    .badge-amber { background:var(--amber-bg); color:var(--amber); border-color:var(--amber-br); }
+    .badge-red   { background:var(--red-bg);   color:var(--red);   border-color:var(--red-br); }
+
+    /* ── Layer diagram ── */
+    .arch-diagram {
+      background:var(--surface); border:1px solid var(--border); border-radius:20px;
+      padding:clamp(14px,3vw,30px); box-shadow:var(--shadow-lg);
+    }
+    .arch-layer { border-radius:14px; padding:clamp(14px,2.5vw,18px); }
+    .arch-layer-label {
+      font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+      margin-bottom:13px; opacity:.78; display:flex; align-items:center; gap:7px; flex-wrap:wrap;
+    }
+    .arch-layer.client   { background:var(--green-bg);  border:1.5px solid var(--green-br); }
+    .arch-layer.backend  { background:var(--blue-bg);   border:1.5px solid var(--blue-br); }
+    .arch-layer.data     { background:var(--purple-bg); border:1.5px solid var(--purple-br); }
+    .arch-layer.external { background:var(--amber-bg);  border:1.5px solid var(--amber-br); }
+    .arch-arrow {
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      padding:10px 0; color:var(--slate); font-size:20px; flex-wrap:wrap;
+    }
+    .arch-arrow span {
+      font-size:11.5px; font-weight:600; color:var(--slate);
+      font-family:'JetBrains Mono',monospace; direction:ltr;
+    }
+    .layer-boxes { display:flex; gap:10px; flex-wrap:wrap; }
+    .layer-box {
+      flex:1 1 150px; background:var(--surface); border:1px solid var(--border);
+      border-radius:10px; padding:12px 14px; min-width:0;
+    }
+    .box-icon { font-size:18px; margin-bottom:5px; }
+    .box-name { font-weight:700; font-size:13px; }
+    .box-desc {
+      font-size:11px; color:var(--slate); margin-top:4px;
+      font-family:'JetBrains Mono',monospace; direction:ltr; line-height:1.65;
+      overflow-wrap:break-word;
+    }
+
+    /* ── Tables ── */
+    .t-wrap {
+      overflow-x:auto; border:1px solid var(--border); border-radius:14px;
+      background:var(--surface); box-shadow:var(--shadow); margin-bottom:16px;
+    }
+    table.t { width:100%; border-collapse:collapse; font-size:13px; min-width:440px; }
+    table.t th {
+      background:var(--surface-alt); font-weight:700; font-size:12px; text-align:right;
+      padding:11px 14px; border-bottom:1px solid var(--border); white-space:nowrap;
+    }
+    table.t td { padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top; line-height:1.7; }
+    table.t tbody tr:last-child td { border-bottom:none; }
+    table.t td.mono { direction:ltr; text-align:left; font-size:12px; }
+    .muted { color:var(--slate); }
+    .nowrap { white-space:nowrap; }
+
+    .m {
+      font-family:'JetBrains Mono',monospace; font-size:10.5px; font-weight:700;
+      padding:2px 7px; border-radius:5px; display:inline-block; direction:ltr;
+    }
+    .m-get  { background:var(--blue-bg);  color:var(--blue); }
+    .m-post { background:var(--green-bg); color:var(--green); }
+    .m-put  { background:var(--amber-bg); color:var(--amber); }
+
+    /* ── Code block ── */
+    pre.code {
+      background:var(--code-bg); border:1px solid var(--border); border-radius:12px;
+      padding:16px 18px; overflow-x:auto; direction:ltr; text-align:left;
+      font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.95;
+    }
+    pre.code .c { color:var(--slate); }
+    pre.code .k { color:var(--purple); }
+    pre.code .s { color:var(--green); }
+
+    /* ── Tree ── */
+    .tree {
+      font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:2.05;
+      direction:ltr; text-align:left; overflow-x:auto; white-space:pre;
+    }
+    .tree .n { color:var(--slate); }
+    .tree .f { font-weight:600; }
+
+    /* ── Flow chain ── */
+    .chain { display:flex; align-items:stretch; gap:8px; flex-wrap:wrap; }
+    .step {
+      flex:1 1 128px; background:var(--surface); border:1px solid var(--border);
+      border-radius:11px; padding:12px; text-align:center; min-width:0;
+    }
+    .step-n {
+      font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700;
+      color:var(--slate); display:block; margin-bottom:5px;
+    }
+    .step-t { font-weight:700; font-size:13px; }
+    .step-d { font-size:11px; color:var(--slate); margin-top:4px; line-height:1.65; overflow-wrap:break-word; }
+
+    /* ── Grids ── */
+    .grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr)); gap:14px; }
+
+    /* ── Notes ── */
+    .note {
+      border-radius:12px; padding:14px 16px; font-size:13.5px; line-height:1.9;
+      border:1px solid; margin-bottom:14px;
+    }
+    .note:last-child { margin-bottom:0; }
+    .note-title { font-weight:700; margin-bottom:5px; display:flex; align-items:center; gap:7px; }
+    .note-warn  { background:var(--red-bg);   border-color:var(--red-br); }
+    .note-warn .note-title { color:var(--red); }
+    .note-info  { background:var(--blue-bg);  border-color:var(--blue-br); }
+    .note-info .note-title { color:var(--blue); }
+    .note-ok    { background:var(--green-bg); border-color:var(--green-br); }
+    .note-ok .note-title { color:var(--green); }
+    .note-amber { background:var(--amber-bg); border-color:var(--amber-br); }
+    .note-amber .note-title { color:var(--amber); }
+
+    /* ── Pills ── */
+    .pill {
+      font-size:11.5px; font-weight:700; padding:2px 9px; border-radius:20px;
+      border:1px solid; display:inline-block; white-space:nowrap;
+    }
+    .pill-ok  { background:var(--green-bg); color:var(--green); border-color:var(--green-br); }
+    .pill-wip { background:var(--amber-bg); color:var(--amber); border-color:var(--amber-br); }
+    .pill-no  { background:var(--red-bg);   color:var(--red);   border-color:var(--red-br); }
+
+    /* ── Pipeline ── */
+    .pipe { display:flex; flex-direction:column; }
+    .pipe-step {
+      display:flex; align-items:flex-start; gap:13px;
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:12px; padding:13px 15px;
+    }
+    .pipe-ico {
+      width:30px; height:30px; border-radius:9px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center; font-size:15px;
+      background:var(--surface-alt);
+    }
+    .pipe-body { min-width:0; flex:1; }
+    .pipe-t { font-weight:700; font-size:13.5px; }
+    .pipe-d { font-size:12px; color:var(--slate); margin-top:4px; line-height:1.8; overflow-wrap:break-word; }
+    .pipe-arr { text-align:center; color:var(--slate); font-size:15px; padding:5px 0; }
+
+    /* ── Scorecard ── */
+    .sc { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:14px; }
+    .sc-col { border-radius:14px; padding:18px; border:1.5px solid; }
+    .sc-flutter { background:var(--blue-bg);  border-color:var(--blue-br); }
+    .sc-expo    { background:var(--purple-bg);border-color:var(--purple-br); }
+    .sc-head { font-weight:800; font-size:15px; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+    .sc-flutter .sc-head { color:var(--blue); }
+    .sc-expo .sc-head { color:var(--purple); }
+    .sc-item {
+      background:var(--surface); border-radius:9px; padding:10px 12px; margin-bottom:8px;
+      font-size:12.5px; line-height:1.8;
+    }
+    .sc-item:last-child { margin-bottom:0; }
+    .sc-item b { display:block; margin-bottom:2px; }
+
+    /* ── Footer ── */
+    footer {
+      border-top:1px solid var(--border); padding:26px 16px; text-align:center;
+      color:var(--slate); font-size:12.5px; line-height:2;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">
+    <span>🏋️ لياقتك</span>
+    <span class="header-badge">معمارية الجوال</span>
+  </div>
+  <a class="back-link" href="Architecture.html">معمارية الويب ←</a>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>معمارية تطبيق لياقتك للجوال</h1>
+    <p>
+      توثيق تقني لتطبيق الجوال: بنية نسخة Flutter الجاهزة للنشر، طبقة الاتصال بالخادم،
+      خط البناء إلى TestFlight، ونسخة Expo التجريبية الموازية.
+    </p>
+    <div class="hero-meta">
+      <span class="badge badge-blue">🐦 Flutter — نسخة الإنتاج</span>
+      <span class="badge badge-green">🚀 Codemagic → TestFlight</span>
+      <span class="badge badge-purple">⚛️ Expo — منفذ تجريبي</span>
+      <span class="badge badge-amber">🔑 JWT Auth</span>
+      <span class="badge badge-red">🤖 Gemini Vision</span>
+    </div>
+  </div>
+
+  <!-- 1. OVERVIEW -->
+  <section id="overview">
+    <h2>
+      <span class="h2-num" style="background:var(--green-bg);color:var(--green)">1</span>
+      الجوال داخل النظام
+    </h2>
+    <p class="lede">
+      تطبيق الجوال عميل رقيق (<span dir="ltr">thin client</span>): لا يحتوي منطق أعمال ولا اتصالاً
+      بقاعدة البيانات. كل ما يفعله هو إرسال طلبات <code>HTTPS</code> إلى نفس خادم
+      <span dir="ltr">Express</span> الذي يخدم الويب، مع ترويسة
+      <code>Authorization: Bearer &lt;JWT&gt;</code>. الخادم هو الجهة الوحيدة التي تلمس
+      <span dir="ltr">Firestore</span> أو تستدعي الذكاء الاصطناعي.
+    </p>
+
+    <div class="arch-diagram">
+
+      <div class="arch-layer client">
+        <div class="arch-layer-label">📱 Mobile Clients</div>
+        <div class="layer-boxes">
+          <div class="layer-box">
+            <div class="box-icon">🐦</div>
+            <div class="box-name">Flutter — جاهز</div>
+            <div class="box-desc">layaqtek_app/<br>5 screens + 3 sheets<br>3,003 lines Dart</div>
+          </div>
+          <div class="layer-box">
+            <div class="box-icon">⚛️</div>
+            <div class="box-name">Expo — تجريبي</div>
+            <div class="box-desc">layaqtek_expo/<br>1 of 5 routes ported<br>Expo Go only</div>
+          </div>
+          <div class="layer-box">
+            <div class="box-icon">🖥️</div>
+            <div class="box-name">الويب — المرجع</div>
+            <div class="box-desc">frontend-react/<br>React 18 + Vite<br>layaqtek.vercel.app</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arch-arrow">
+        ↓ <span>HTTPS · Authorization: Bearer &lt;JWT&gt; · JSON</span>
+      </div>
+
+      <div class="arch-layer backend">
+        <div class="arch-layer-label">🟢 API Layer — Node.js / Express على Vercel</div>
+        <div class="layer-boxes">
+          <div class="layer-box">
+            <div class="box-name">‏/api/auth</div>
+            <div class="box-desc">register · login<br>forgot/reset-password<br>profile · goals</div>
+          </div>
+          <div class="layer-box">
+            <div class="box-name">‏/api/food</div>
+            <div class="box-desc">search · all<br>log/:date (GET·POST)<br>stats?days=N</div>
+          </div>
+          <div class="layer-box">
+            <div class="box-name">‏/api/ai</div>
+            <div class="box-desc">analyze<br>rate limit 10/min</div>
+          </div>
+          <div class="layer-box">
+            <div class="box-name">الوسائط</div>
+            <div class="box-desc">helmet · CORS<br>JWT verify<br>rate limiters</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arch-arrow">
+        ↓ <span>firebase-admin (Admin SDK)</span> &nbsp;·&nbsp; <span>REST fetch</span>
+      </div>
+
+      <div class="arch-layer data">
+        <div class="arch-layer-label">🟣 Data — Cloud Firestore</div>
+        <div class="layer-boxes">
+          <div class="layer-box">
+            <div class="box-name">users/{uid}</div>
+            <div class="box-desc">bcrypt password<br>profile{} · goals{}</div>
+          </div>
+          <div class="layer-box">
+            <div class="box-name">users/{uid}/days/{date}</div>
+            <div class="box-desc">meals{} · water<br>one doc per YYYY-MM-DD</div>
+          </div>
+          <div class="layer-box">
+            <div class="box-name">foods/{foodId}</div>
+            <div class="box-desc">USDA seed + ai-detected<br>per-100g values</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arch-arrow">↓ <span>external</span></div>
+
+      <div class="arch-layer external">
+        <div class="arch-layer-label">🟡 خدمات خارجية — يستدعيها الخادم فقط</div>
+        <div class="layer-boxes">
+          <div class="layer-box">
+            <div class="box-icon">🤖</div>
+            <div class="box-name">Google Gemini</div>
+            <div class="box-desc">gemini-2.5-flash<br>↳ gemini-flash-lite-latest<br>30s timeout each</div>
+          </div>
+          <div class="layer-box">
+            <div class="box-icon">✉️</div>
+            <div class="box-name">Gmail SMTP</div>
+            <div class="box-desc">nodemailer<br>password reset link</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="margin-top:16px">
+      <div class="note note-info">
+        <div class="note-title">🔒 لا يتصل أي عميل بـ Firestore مباشرة</div>
+        المصادقة في هذا النظام <b>JWT مخصّص</b>، وليست <span dir="ltr">Firebase Auth</span> — لا
+        يحمل أي عميل رمز <span dir="ltr">Firebase ID token</span>، فتكون
+        <code>request.auth</code> دائماً <code>null</code>. وبالتالي كل قاعدة في
+        <code>firestore.rules</code> تُقيَّم إلى <code>false</code> من جهة العميل. القواعد هنا
+        <b>طبقة دفاع إضافية</b> تُغلق قاعدة البيانات أمام الوصول المباشر، بينما تمر 100% من
+        القراءات والكتابات عبر الخادم الذي يستخدم <span dir="ltr">Admin SDK</span> ويتجاوز القواعد.
+      </div>
+      <div class="note note-ok">
+        <div class="note-title">✅ لماذا لا يحتاج الجوال إعداد CORS</div>
+        دالة <code>fetch</code> في <span dir="ltr">React Native</span> لا ترسل ترويسة
+        <code>Origin</code>، وكذلك طلبات <span dir="ltr">Dart http</span>. وفي
+        <code>backend/server.js</code> يسمح الشرط
+        <code>if (!origin) return callback(null, true)</code> بمرورها. الاستثناء الوحيد
+        <code>npm run web</code> في Expo: يعمل من <code>localhost:8081</code> وهو غير مُدرج في
+        <code>allowedOrigins</code>، فيحتاج إضافة يدوية.
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. FLUTTER STRUCTURE -->
+  <section id="flutter">
+    <h2>
+      <span class="h2-num" style="background:var(--blue-bg);color:var(--blue)">2</span>
+      هيكل تطبيق Flutter
+    </h2>
+    <p class="lede">
+      الاعتماديات مقصودة النحافة: أربع حزم فقط، و<b>لا توجد أي حزمة Firebase</b> — لأن التطبيق
+      لا يلمس قاعدة البيانات. لا يوجد <span dir="ltr">router</span> ولا مكتبة إدارة حالة؛
+      التنقل أمري عبر <code>Navigator</code> والحالة محلية في كل شاشة.
+    </p>
+
+    <div class="card">
+      <h3>📂 ‏lib/ — عدد الأسطر الفعلي</h3>
+      <div class="tree"><span class="n">lib/</span>
+├── <span class="f">main.dart</span>                  <span class="n">147  نقطة البداية + الثيم (فاتح/داكن) + RTL</span>
+├── <span class="f">api.dart</span>                   <span class="n">156  كل طلبات الخادم — class Api</span>
+├── <span class="n">screens/</span>
+│   ├── <span class="f">login.dart</span>             <span class="n">267  تسجيل الدخول / إنشاء حساب</span>
+│   ├── <span class="f">forgot_password.dart</span>   <span class="n">169  طلب رابط إعادة التعيين</span>
+│   ├── <span class="f">profile_setup.dart</span>     <span class="n">378  إعداد الملف — 4 خطوات</span>
+│   ├── <span class="f">dashboard.dart</span>         <span class="n">630  اللوحة الرئيسية + التنقل بين الأيام</span>
+│   └── <span class="f">progress.dart</span>          <span class="n">347  التقدم والتحليل — 7/14/30 يوم</span>
+└── <span class="n">widgets/</span>
+    ├── <span class="f">add_food_sheet.dart</span>    <span class="n">303  البحث عن الطعام وإضافته</span>
+    ├── <span class="f">goals_edit_sheet.dart</span>  <span class="n">351  تعديل الأهداف اليومية</span>
+    └── <span class="f">ai_analyzer_section.dart</span><span class="n"> 255  تحليل صورة الطعام</span>
+                                   <span class="n">─────</span>
+                                   <span class="n">3,003 سطر</span></div>
+    </div>
+
+    <div class="card">
+      <h3>🧭 مسار الشاشات — من استدعاءات Navigator الفعلية</h3>
+      <div class="chain">
+        <div class="step">
+          <span class="step-n">main.dart</span>
+          <div class="step-t">بوابة الدخول</div>
+          <div class="step-d">يقرأ layaqtek_token من SharedPreferences ويختار الشاشة الأولى</div>
+        </div>
+        <div class="step">
+          <span class="step-n">login.dart</span>
+          <div class="step-t">تسجيل الدخول</div>
+          <div class="step-d">pushReplacement إلى الوجهة — ولا رجوع للخلف</div>
+        </div>
+        <div class="step">
+          <span class="step-n">profile_setup.dart</span>
+          <div class="step-t">إعداد الملف</div>
+          <div class="step-d">إذا لم يكن profileComplete — 4 خطوات ثم pushReplacement</div>
+        </div>
+        <div class="step">
+          <span class="step-n">dashboard.dart</span>
+          <div class="step-t">اللوحة الرئيسية</div>
+          <div class="step-d">الوجهة النهائية — تستضيف الأوراق الثلاث</div>
+        </div>
+        <div class="step">
+          <span class="step-n">progress.dart</span>
+          <div class="step-t">التقدم</div>
+          <div class="step-d">push عادي من اللوحة — يسمح بالرجوع</div>
+        </div>
+      </div>
+      <div style="margin-top:14px" class="note note-info">
+        <div class="note-title">ℹ️ ملاحظات على التنقل</div>
+        <code>login.dart</code> و <code>profile_setup.dart</code> تستخدمان
+        <code>pushReplacement</code> فلا يستطيع المستخدم الرجوع إلى شاشة تسجيل الدخول بعد
+        الدخول. <code>dashboard.dart:114</code> يستخدم <code>pushReplacement</code> أيضاً عند
+        تسجيل الخروج. الودجات الثلاث في <code>widgets/</code> ليست شاشات بل
+        <span dir="ltr">modal bottom sheets</span> تُفتح من اللوحة وتُغلق بـ <code>pop()</code>.
+      </div>
+    </div>
+
+    <div class="t-wrap">
+      <table class="t">
+        <thead>
+          <tr><th>الحزمة</th><th>الإصدار</th><th>الاستخدام</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono">http</td><td class="mono nowrap">^1.2.0</td><td>كل طلبات الخادم في <code>api.dart</code></td></tr>
+          <tr><td class="mono">shared_preferences</td><td class="mono nowrap">^2.2.3</td><td>الرمز والمستخدم وتفضيل الثيم</td></tr>
+          <tr><td class="mono">google_fonts</td><td class="mono nowrap">^6.2.1</td><td>خط Tajawal عبر التطبيق</td></tr>
+          <tr><td class="mono">image_picker</td><td class="mono nowrap">^1.1.2</td><td>الكاميرا والمعرض لتحليل الصور</td></tr>
+          <tr><td class="mono muted">flutter_lints</td><td class="mono nowrap muted">^4.0.0</td><td class="muted">تطوير فقط</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lede" style="margin-bottom:0">
+      <code>version: 1.0.0+1</code> · <code>publish_to: none</code> ·
+      <span dir="ltr">Dart SDK</span> <code>&gt;=3.0.0 &lt;4.0.0</code>
+    </p>
+  </section>
+
+  <!-- 3. API LAYER -->
+  <section id="api">
+    <h2>
+      <span class="h2-num" style="background:var(--amber-bg);color:var(--amber)">3</span>
+      طبقة الاتصال — <span class="mono" style="font-size:.85em">class Api</span>
+    </h2>
+    <p class="lede">
+      ملف <code>lib/api.dart</code> كامل بـ 156 سطراً، وكل دواله <code>static</code> — لا توجد
+      نسخة يجب تمريرها. القلب هو
+      <code>_request(method, path, [body, timeout])</code>: يضيف الترويسات، ويعالج الأخطاء،
+      ويفك ترميز الاستجابة.
+    </p>
+
+    <div class="card">
+      <h3>⚙️ ما يفعله <span class="mono">_request</span> في كل طلب</h3>
+      <div class="t-wrap" style="margin-bottom:0">
+        <table class="t">
+          <tbody>
+            <tr>
+              <th style="width:170px">الترويسات</th>
+              <td><code>Content-Type: application/json</code> دائماً، و
+                  <code>Authorization: Bearer &lt;token&gt;</code> إذا وُجد رمز محفوظ</td>
+            </tr>
+            <tr>
+              <th>فك ترميز العربية</th>
+              <td><code>jsonDecode(utf8.decode(res.bodyBytes))</code> — وليس <code>res.body</code>،
+                  لأن الأخير قد يفسد النص العربي</td>
+            </tr>
+            <tr>
+              <th>انتهاء الجلسة</th>
+              <td>عند <code>401</code>: ينفّذ <code>clearAuth()</code> ثم يرمي
+                  <code>'جلسة منتهية'</code></td>
+            </tr>
+            <tr>
+              <th>أخطاء الخادم</th>
+              <td>عند <code>&gt;= 400</code>: يرمي <code>data['error']</code> أو
+                  <code>'خطأ في الخادم (code)'</code></td>
+            </tr>
+            <tr>
+              <th>أخطاء الشبكة</th>
+              <td><code>TimeoutException</code> → «انتهت مهلة الاتصال، يرجى المحاولة مرة أخرى»،
+                  و <code>http.ClientException</code> → «تعذر الاتصال بالخادم، تحقق من اتصالك
+                  بالإنترنت»</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h3>🔗 الدوال العامة ومقابلها على الخادم</h3>
+    <div class="t-wrap">
+      <table class="t">
+        <thead>
+          <tr><th>الدالة في Dart</th><th>الطريقة</th><th>المسار</th><th>المهلة</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono">login(email, password)</td><td><span class="m m-post">POST</span></td><td class="mono">/api/auth/login</td><td class="nowrap">20s</td></tr>
+          <tr><td class="mono">register(name, email, password)</td><td><span class="m m-post">POST</span></td><td class="mono">/api/auth/register</td><td class="nowrap">20s</td></tr>
+          <tr><td class="mono">forgotPassword(email)</td><td><span class="m m-post">POST</span></td><td class="mono">/api/auth/forgot-password</td><td class="nowrap">20s</td></tr>
+          <tr><td class="mono">saveProfile({...})</td><td><span class="m m-put">PUT</span></td><td class="mono">/api/auth/profile</td><td class="nowrap">20s</td></tr>
+          <tr><td class="mono">updateGoals(cal, p, c, f, water)</td><td><span class="m m-put">PUT</span></td><td class="mono">/api/auth/goals</td><td class="nowrap">20s</td></tr>
+          <tr><td class="mono">getAllFoods()</td><td><span class="m m-get">GET</span></td><td class="mono">/api/food/all</td><td class="nowrap">20s</td></tr>
+          <tr><td class="mono">searchFood(query)</td><td><span class="m m-get">GET</span></td><td class="mono">/api/food/search?q=</td><td class="nowrap">20s</td></tr>
+          <tr><td class="mono">getLog(date)</td><td><span class="m m-get">GET</span></td><td class="mono">/api/food/log/:date</td><td class="nowrap">20s</td></tr>
+          <tr><td class="mono">saveLog(date, meals, water)</td><td><span class="m m-post">POST</span></td><td class="mono">/api/food/log/:date</td><td class="nowrap">20s</td></tr>
+          <tr><td class="mono">getStats(days)</td><td><span class="m m-get">GET</span></td><td class="mono">/api/food/stats?days=</td><td class="nowrap">20s</td></tr>
+          <tr><td class="mono">analyzeImage(base64, mimeType)</td><td><span class="m m-post">POST</span></td><td class="mono">/api/ai/analyze</td><td class="nowrap"><b style="color:var(--red)">75s</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid2">
+      <div class="note note-amber" style="margin-bottom:0">
+        <div class="note-title">⏱️ لماذا 75 ثانية لتحليل الصورة</div>
+        الخادم يجرّب سلسلة بدائل من موديلات Gemini — <code>gemini-2.5-flash</code> ثم
+        <code>gemini-flash-lite-latest</code> — بمهلة 30 ثانية لكل واحد. مهلة 20 ثانية
+        الافتراضية كانت ستنتهي قبل أن ينتهي الخادم من المحاولة الأولى.
+        كما أن <code>imageBase64</code> يجب أن يُمرَّر <b>بدون</b> البادئة
+        <code>data:image/...;base64,</code>.
+      </div>
+      <div class="note note-info" style="margin-bottom:0">
+        <div class="note-title">🔍 لا توجد دالة resetPassword</div>
+        قرار مقصود: <code>forgotPassword</code> يطلب من الخادم إرسال بريد، والرابط في البريد
+        يفتح صفحة الويب الجاهزة <code>/#/reset-password</code> في المتصفح. لا شاشة داخل
+        التطبيق لإدخال كلمة المرور الجديدة، فلا حاجة لنقطة اتصال مقابلة.
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. BASE URL -->
+  <section id="baseurl">
+    <h2>
+      <span class="h2-num" style="background:var(--purple-bg);color:var(--purple)">4</span>
+      عنوان الخادم — قيمة تُحسم وقت البناء
+    </h2>
+    <p class="lede">
+      تطبيق الويب يستنتج عنوان الخادم من <code>window.location</code>، لكن على الجهاز لا يوجد
+      <span dir="ltr">origin</span>. لذلك يأتي العنوان في Flutter من البيئة — وهذه أهم نقطة
+      تشغيلية في التطبيق كله.
+    </p>
+
+    <div class="card">
+      <pre class="code"><span class="c">// lib/api.dart:15-16</span>
+<span class="k">static const</span> String baseUrl =
+    String.fromEnvironment(<span class="s">'API_BASE_URL'</span>, defaultValue: <span class="s">'http://10.0.2.2:3001'</span>);</pre>
+      <p class="lede" style="margin:14px 0 0">
+        <code>String.fromEnvironment</code> قراءة <code>const</code> لقيمة
+        <code>--dart-define</code>، أي أنها <b>تُخبز داخل البناء ولا يمكن تغييرها وقت
+        التشغيل</b>. لا يوجد ملف إعدادات ولا شاشة لتبديل الخادم: العنوان خاصية من خصائص
+        نسخة التطبيق نفسها. و <code>10.0.2.2</code> هو العنوان البديل الذي يرى به محاكي
+        Android جهاز <span dir="ltr">localhost</span> المضيف.
+      </p>
+    </div>
+
+    <div class="t-wrap">
+      <table class="t">
+        <thead>
+          <tr><th>البيئة</th><th>العنوان</th><th>كيف يُضبط</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>محاكي Android</td>
+            <td class="mono">http://10.0.2.2:3001</td>
+            <td class="muted">افتراضي — لا شيء</td>
+          </tr>
+          <tr>
+            <td>محاكي iOS</td>
+            <td class="mono">http://localhost:3001</td>
+            <td class="mono">--dart-define=API_BASE_URL=...</td>
+          </tr>
+          <tr>
+            <td>جوال حقيقي على نفس الشبكة</td>
+            <td class="mono">http://YOUR_PC_IP:3001</td>
+            <td>مع <code>ipconfig</code> لمعرفة الآيبي</td>
+          </tr>
+          <tr>
+            <td>الخادم المنشور</td>
+            <td class="mono">https://layaqtek.vercel.app</td>
+            <td>يمرّره <code>codemagic.yaml</code> تلقائياً</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note note-warn">
+      <div class="note-title">⚠️ أكثر خطأ متوقع في هذا التطبيق</div>
+      بناء نسخة للجهاز الحقيقي <b>دون</b> تمرير <code>--dart-define</code> يعني أن التطبيق
+      سيحاول الاتصال بـ <code>10.0.2.2:3001</code> — عنوان لا معنى له خارج محاكي Android —
+      <b>فتفشل كل الطلبات بلا استثناء</b>، والشاشة تظهر «تعذر الاتصال بالخادم». لا يوجد خطأ
+      وقت التصريف يحمي من هذا، ولهذا يحذّر منه
+      <code>layaqtek_app/README.md</code> بخط عريض ويضبطه خط البناء في القسم 7.
+    </div>
+
+    <div class="card">
+      <h3>↔️ المقارنة مع Expo — ثلاث طبقات وقت التشغيل</h3>
+      <pre class="code"><span class="c">// layaqtek_expo/src/api.js</span>
+<span class="k">const</span> DEFAULT_BASE_URL = Platform.select({
+  android: <span class="s">'http://10.0.2.2:3001'</span>,
+  default: <span class="s">'http://localhost:3001'</span>,
+});
+
+<span class="k">export const</span> BASE_URL =
+  process.env.EXPO_PUBLIC_API_BASE_URL        <span class="c">// 1. من .env.local</span>
+  || Constants.expoConfig?.extra?.apiBaseUrl  <span class="c">// 2. من app.json — حالياً null</span>
+  || DEFAULT_BASE_URL;                        <span class="c">// 3. حسب المنصة</span></pre>
+      <p class="lede" style="margin:14px 0 0">
+        الفرق الجوهري: Expo تختار العنوان <b>وقت التشغيل</b> وتفرّق تلقائياً بين محاكي
+        Android و iOS، بينما Flutter تحتاج قيمة صريحة وقت البناء. مقابل ذلك، قيمة Flutter
+        مضمونة لا تتغير بعد البناء.
+      </p>
+    </div>
+  </section>
+
+  <!-- 5. STORAGE & THEME -->
+  <section id="storage">
+    <h2>
+      <span class="h2-num" style="background:var(--green-bg);color:var(--green)">5</span>
+      التخزين المحلي والثيم
+    </h2>
+    <p class="lede">
+      العملاء الثلاثة يستخدمون <b>نفس أسماء المفاتيح حرفياً</b>. هذا ليس تفصيلاً جمالياً: هو ما
+      يجعل سلوك الجلسة وتفضيل الثيم متوقعاً ومتطابقاً بين الويب والجوال، ويسهّل تتبّع المشاكل.
+    </p>
+
+    <div class="t-wrap">
+      <table class="t">
+        <thead>
+          <tr><th>المفتاح</th><th>الويب</th><th>Flutter</th><th>Expo</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono">layaqtek_token</td>
+            <td class="muted">localStorage</td>
+            <td>SharedPreferences <span class="pill pill-no">نص صريح</span></td>
+            <td>expo-secure-store <span class="pill pill-ok">Keychain</span></td>
+          </tr>
+          <tr>
+            <td class="mono">layaqtek_user</td>
+            <td class="muted">localStorage</td>
+            <td>SharedPreferences</td>
+            <td>AsyncStorage</td>
+          </tr>
+          <tr>
+            <td class="mono">layaqtek_theme</td>
+            <td class="muted">localStorage</td>
+            <td>SharedPreferences</td>
+            <td>AsyncStorage</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>🌓 الثيم في Flutter</h3>
+        <p class="lede" style="margin-bottom:12px">
+          <code>ThemeController.mode</code> هو <code>ValueNotifier&lt;ThemeMode&gt;</code>
+          قيمته الافتراضية <code>ThemeMode.system</code>، ويُغلّف التطبيق بـ
+          <code>ValueListenableBuilder</code> فيعيد البناء عند التبديل. يُقرأ التفضيل في
+          <code>main()</code> قبل <code>runApp</code> فلا توجد وميضة ثيم خاطئ عند الإقلاع.
+        </p>
+        <pre class="code"><span class="c">// main.dart — Material 3 من بذرة واحدة</span>
+useMaterial3: <span class="k">true</span>,
+colorScheme: ColorScheme.fromSeed(
+  seedColor: kPrimary, brightness: brightness),
+textTheme: GoogleFonts.tajawalTextTheme(...)</pre>
+      </div>
+      <div class="card">
+        <h3>↔️ RTL — سطر واحد يكفي</h3>
+        <pre class="code"><span class="c">// main.dart:140-141</span>
+builder: (context, child) =&gt; Directionality(
+  textDirection: TextDirection.rtl, child: child!),</pre>
+        <p class="lede" style="margin:12px 0 0">
+          يُجبر التطبيق كله على الاتجاه من اليمين لليسار، ويعمل فوراً وفي كل مكان. هذه نقطة
+          لصالح Flutter بوضوح في تطبيق عربي بالأساس — المقارنة في القسم 9.
+        </p>
+      </div>
+    </div>
+
+    <h3>🎨 رموز التصميم — رحلة القيمة من الويب إلى الجوال</h3>
+    <p class="lede">
+      المصدر الوحيد للحقيقة هو <code>frontend-react/src/index.css</code>؛ تُنسخ القيم يدوياً إلى
+      ثوابت Dart وإلى <code>layaqtek_expo/src/theme.js</code>. الألوان الدلالية
+      (البروتين، الكارب، الدهون، الماء) <b>ثابتة بين الوضعين</b> عن قصد لأنها واضحة على خلفية
+      فاتحة وداكنة، وما يتغيّر هو الأسطح فقط.
+    </p>
+    <div class="t-wrap">
+      <table class="t">
+        <thead>
+          <tr><th>الرمز</th><th>القيمة</th><th>الدور</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono">kPrimary</td><td class="mono">0xFF16A34A · #16a34a</td><td>الأخضر الأساسي — هوية التطبيق</td></tr>
+          <tr><td class="mono">kPrimaryLight</td><td class="mono">0xFF22C55E · #22c55e</td><td>الأساسي في الوضع الداكن</td></tr>
+          <tr><td class="mono">kAccent</td><td class="mono">0xFFD97706</td><td>التمييز — وأيضاً لون الكارب</td></tr>
+          <tr><td class="mono">kDanger</td><td class="mono">0xFFDC2626</td><td>الخطر — وأيضاً لون الدهون</td></tr>
+          <tr><td class="mono">kProteinColor</td><td class="mono">0xFF2563EB</td><td>البروتين</td></tr>
+          <tr><td class="mono">kWaterColor</td><td class="mono">0xFF0284C7</td><td>الماء</td></tr>
+          <tr><td class="mono">kPrimaryBg</td><td class="mono">0xFFF0FDF4</td><td>خلفية بلمسة خضراء — فاتح</td></tr>
+          <tr><td class="mono">kPrimaryBgDark</td><td class="mono">0xFF16341F</td><td>مقابلها الداكن</td></tr>
+          <tr><td class="mono muted">surface / bg — داكن</td><td class="mono">0xFF131C2E · 0xFF0B1220</td><td>سطح البطاقة وخلفية الشاشة</td></tr>
+          <tr><td class="mono muted">border / text — داكن</td><td class="mono">0xFF2B3A52 · 0xFFE2E8F0</td><td>الحدود والنص</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note note-info">
+      <div class="note-title">💡 هذه الصفحة تستخدم نفس الرموز</div>
+      الوضع الداكن في هذا المستند مبني على ألوان أسطح التطبيق نفسها
+      (<code>#0b1220</code>، <code>#131c2e</code>، <code>#2b3a52</code>) — جرّب تبديل وضع
+      النظام.
+    </div>
+  </section>
+
+  <!-- 6. PLATFORM CONFIG -->
+  <section id="platform">
+    <h2>
+      <span class="h2-num" style="background:var(--blue-bg);color:var(--blue)">6</span>
+      إعدادات المنصات
+    </h2>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>🍎 iOS — ios/Runner/Info.plist</h3>
+        <div class="t-wrap" style="margin-bottom:0">
+          <table class="t" style="min-width:0">
+            <tbody>
+              <tr>
+                <th style="width:auto">CFBundleDisplayName</th>
+                <td><b>لياقتك</b> — الاسم الظاهر تحت الأيقونة</td>
+              </tr>
+              <tr>
+                <th>CFBundleLocalizations</th>
+                <td class="mono">["ar"]</td>
+              </tr>
+              <tr>
+                <th>CFBundleName</th>
+                <td class="mono muted">layaqtek_app</td>
+              </tr>
+              <tr>
+                <th>NSCameraUsageDescription</th>
+                <td>نص عربي — إلزامي لـ <code>image_picker</code></td>
+              </tr>
+              <tr>
+                <th>NSPhotoLibraryUsageDescription</th>
+                <td>نص عربي — إلزامي لـ <code>image_picker</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note note-amber" style="margin-top:14px;margin-bottom:0">
+          <div class="note-title">🔗 المفتاحان مترابطان</div>
+          <code>CFBundleDisplayName</code> العربي <b>لا يظهر</b> دون
+          <code>CFBundleLocalizations</code> التي تُعلن دعم العربية؛ إضافة أحدهما وحده لا تكفي.
+          وغياب نصوص الأذونات يؤدي إلى رفض فوري من App Review وليس مجرد تحذير.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🤖 Android — app/build.gradle.kts</h3>
+        <div class="t-wrap" style="margin-bottom:0">
+          <table class="t" style="min-width:0">
+            <tbody>
+              <tr><th style="width:auto">namespace</th><td class="mono">com.layaqtek.layaqtek_app</td></tr>
+              <tr><th>applicationId</th><td class="mono">com.layaqtek.layaqtek_app</td></tr>
+              <tr><th>minSdk / targetSdk</th><td class="mono muted">flutter.minSdkVersion</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note note-warn" style="margin-top:14px;margin-bottom:0">
+          <div class="note-title">⚠️ ثلاثة معرّفات مختلفة في المستودع</div>
+          <code>com.layaqtek.layaqtekApp</code> في توقيع iOS داخل
+          <code>codemagic.yaml</code>، و <code>com.layaqtek.layaqtek_app</code> على Android،
+          و <code>com.layaqtek.app</code> في <code>layaqtek_expo/app.json</code>. ليست مشكلة
+          تقنية الآن — كل منصة مستقلة — لكنها تصبح مشكلة عند الربط بـ App Store Connect أو
+          Play Console أو عند توحيد التحليلات، وتغيير المعرّف بعد النشر غير ممكن.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. CI/CD -->
+  <section id="cicd">
+    <h2>
+      <span class="h2-num" style="background:var(--amber-bg);color:var(--amber)">7</span>
+      خط البناء والنشر — Codemagic → TestFlight
+    </h2>
+    <p class="lede">
+      ملف <code>codemagic.yaml</code> في <b>جذر المستودع</b> (شرط إلزامي — لا تُقرأ الإعدادات من
+      مجلد فرعي) يبني تطبيق Flutter ويرسله إلى TestFlight تلقائياً عند كل دفعة على
+      <code>master</code>. هذا هو السبب العملي لاختيار Codemagic: يوفّر آلة
+      <span dir="ltr">macOS</span> للبناء، فلا حاجة إلى جهاز Mac.
+    </p>
+
+    <div class="card">
+      <div class="pipe">
+        <div class="pipe-step">
+          <div class="pipe-ico" style="background:var(--green-bg);color:var(--green)">📤</div>
+          <div class="pipe-body">
+            <div class="pipe-t">دفعة على master</div>
+            <div class="pipe-d"><code>triggering.events: [push]</code> مع
+              <code>branch_patterns: master</code></div>
+          </div>
+        </div>
+        <div class="pipe-arr">↓</div>
+        <div class="pipe-step">
+          <div class="pipe-ico" style="background:var(--blue-bg);color:var(--blue)">🖥️</div>
+          <div class="pipe-body">
+            <div class="pipe-t">تهيئة آلة البناء</div>
+            <div class="pipe-d"><code>mac_mini_m2</code> · <code>flutter: stable</code> ·
+              <code>xcode: latest</code> · <code>cocoapods: default</code> · سقف 45 دقيقة</div>
+          </div>
+        </div>
+        <div class="pipe-arr">↓</div>
+        <div class="pipe-step">
+          <div class="pipe-ico" style="background:var(--purple-bg);color:var(--purple)">📦</div>
+          <div class="pipe-body">
+            <div class="pipe-t">flutter pub get</div>
+            <div class="pipe-d">داخل <code>layaqtek_app/</code> — كل خطوة تبدأ بـ
+              <code>cd layaqtek_app</code> لأن مجلد العمل هو الجذر</div>
+          </div>
+        </div>
+        <div class="pipe-arr">↓</div>
+        <div class="pipe-step">
+          <div class="pipe-ico" style="background:var(--amber-bg);color:var(--amber)">🔎</div>
+          <div class="pipe-body">
+            <div class="pipe-t">flutter analyze</div>
+            <div class="pipe-d"><code>--no-fatal-infos --no-fatal-warnings</code> مع
+              <code>ignore_failure: true</code> — تقرير لا بوابة، فلا يوقف البناء</div>
+          </div>
+        </div>
+        <div class="pipe-arr">↓</div>
+        <div class="pipe-step">
+          <div class="pipe-ico" style="background:var(--blue-bg);color:var(--blue)">🔢</div>
+          <div class="pipe-body">
+            <div class="pipe-t">استنتاج رقم البناء</div>
+            <div class="pipe-d"><code>app-store-connect get-latest-testflight-build-number</code>
+              ثم <code>+1</code>، ويعود إلى <code>1</code> إذا كان
+              <code>APP_STORE_APPLE_ID</code> فارغاً. السبب: App Store Connect يرفض أي رفع
+              برقم بناء مكرر</div>
+          </div>
+        </div>
+        <div class="pipe-arr">↓</div>
+        <div class="pipe-step">
+          <div class="pipe-ico" style="background:var(--green-bg);color:var(--green)">🔨</div>
+          <div class="pipe-body">
+            <div class="pipe-t">flutter build ipa --release</div>
+            <div class="pipe-d">
+              <code>--build-number="$BUILD_NUMBER"</code> ·
+              <code>--dart-define=API_BASE_URL="$API_BASE_URL"</code> ·
+              <code>--export-options-plist=/Users/builder/export_options.plist</code><br>
+              التوقيع: <code>ios_signing.distribution_type: app_store</code> مع
+              <code>bundle_identifier: com.layaqtek.layaqtekApp</code>
+            </div>
+          </div>
+        </div>
+        <div class="pipe-arr">↓</div>
+        <div class="pipe-step">
+          <div class="pipe-ico" style="background:var(--purple-bg);color:var(--purple)">🚀</div>
+          <div class="pipe-body">
+            <div class="pipe-t">النشر إلى TestFlight</div>
+            <div class="pipe-d"><code>publishing.app_store_connect</code> مع
+              <code>auth: integration</code> و <code>submit_to_testflight: true</code>،
+              عبر التكامل <code>layaqtek_asc_key</code>. المخرجات المحفوظة:
+              <code>*.ipa</code> و سجلات <code>xcodebuild</code></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="note note-warn" style="margin-bottom:0">
+        <div class="note-title">⚠️ master وليس main</div>
+        فرع العمل في هذا المستودع هو <code>master</code>، والملف يحمل تعليقاً صريحاً بهذا:
+        لو كُتب النمط <code>main</code> فلن يُطلَق أي بناء <b>أبداً، وبصمت</b> — لا رسالة خطأ
+        ولا بناء فاشل، فقط لا شيء. وهذا أسوأ أشكال الفشل.
+      </div>
+      <div class="note note-amber" style="margin-bottom:0">
+        <div class="note-title">📋 ما تبقّى قبل أول بناء</div>
+        <code>APP_STORE_APPLE_ID</code> لا يزال <code>""</code>، فيبدأ أول بناء من الرقم
+        <code>1</code> وهو سلوك مقصود قبل وجود سجل التطبيق. بعد إنشاء السجل في App Store
+        Connect يجب تعبئة الرقم من صفحة <span dir="ltr">App Information</span>، وإلا ظل كل
+        بناء يحمل الرقم <code>1</code> ورُفض الرفع الثاني.
+      </div>
+    </div>
+
+    <h3 style="margin-top:20px">💰 المتطلبات والتكلفة</h3>
+    <div class="t-wrap" style="margin-bottom:0">
+      <table class="t">
+        <thead>
+          <tr><th>العنصر</th><th>التكلفة</th><th>ملاحظة</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Apple Developer Program</td>
+            <td class="nowrap">$99 / سنة</td>
+            <td>إلزامي لأي تثبيت على جهاز حقيقي — والموافقة تستغرق 24–48 ساعة وتعطّل كل ما
+              بعدها، فتُبدأ أولاً</td>
+          </tr>
+          <tr>
+            <td>Codemagic</td>
+            <td class="nowrap">مجاني</td>
+            <td>‏500 دقيقة macOS شهرياً ≈ 30 بناءً · البناء الواحد ~12–15 دقيقة</td>
+          </tr>
+          <tr>
+            <td>مفتاح App Store Connect API</td>
+            <td class="nowrap">—</td>
+            <td>ملف <code>.p8</code> بصلاحية <span dir="ltr">App Manager</span>، يُنزّل
+              <b>مرة واحدة فقط</b>، ويُرفع في Codemagic باسم <code>layaqtek_asc_key</code>
+              بالضبط. <code>*.p8</code> مُدرج في <code>.gitignore</code></td>
+          </tr>
+          <tr>
+            <td>اختبار TestFlight الداخلي</td>
+            <td class="nowrap">مجاني</td>
+            <td>لا يحتاج مراجعة App Review ويسمح بـ 100 مختبر</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 8. EXPO -->
+  <section id="expo">
+    <h2>
+      <span class="h2-num" style="background:var(--purple-bg);color:var(--purple)">8</span>
+      نسخة Expo — منفذ تجريبي
+    </h2>
+    <p class="lede">
+      مجلد <code>layaqtek_expo/</code> ليس تطبيقاً ثانياً للمنتج، بل <b>تجربة تقييم</b> كما يقول
+      ملف <code>README.md</code> الخاص به حرفياً: منفذ للمقارنة المباشرة مع نسخة Flutter
+      «قبل اتخاذ قرار نهائي بالانتقال… ليس تطبيقاً كاملاً بعد». يتصل بنفس الخادم الخلفي
+      دون أي تغيير عليه.
+    </p>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>🗺️ المسارات — expo-router</h3>
+        <div class="t-wrap" style="margin-bottom:0">
+          <table class="t" style="min-width:0">
+            <thead>
+              <tr><th>الملف</th><th>أسطر</th><th>الحالة</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="mono">_layout.jsx</td><td class="mono">72</td>
+                <td><span class="pill pill-ok">منقول</span></td>
+              </tr>
+              <tr>
+                <td class="mono">login.jsx</td><td class="mono">338</td>
+                <td><span class="pill pill-ok">منقول</span></td>
+              </tr>
+              <tr>
+                <td class="mono">index.jsx</td><td class="mono">109</td>
+                <td><span class="pill pill-wip">شاشة تأكيد مؤقتة</span></td>
+              </tr>
+              <tr>
+                <td class="mono">forgot-password.jsx</td><td class="mono">10</td>
+                <td><span class="pill pill-no">NotPorted</span></td>
+              </tr>
+              <tr>
+                <td class="mono">profile-setup.jsx</td><td class="mono">10</td>
+                <td><span class="pill pill-no">NotPorted</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="lede" style="margin:12px 0 0;font-size:13px">
+          لا يوجد <code>/progress</code> ولا لوحة رئيسية ولا أي من الأوراق الثلاث
+          (<code>add_food_sheet</code>، <code>goals_edit_sheet</code>،
+          <code>ai_analyzer_section</code>). <code>index.jsx</code> يتحقق فقط من حفظ الرمز
+          ويعرض الاسم والعنوان المستخدم وزر خروج.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>🧩 الوحدات — src/</h3>
+        <div class="t-wrap" style="margin-bottom:0">
+          <table class="t" style="min-width:0">
+            <thead>
+              <tr><th>الملف</th><th>أسطر</th><th>الدور</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="mono">api.js</td><td class="mono">154</td><td>19 دالة — نسخة شبه حرفية من الويب</td></tr>
+              <tr><td class="mono">theme.js</td><td class="mono">74</td><td>الرموز من <code>index.css</code></td></tr>
+              <tr><td class="mono">ThemeContext.jsx</td><td class="mono">46</td><td>فاتح/داكن مع حفظ التفضيل</td></tr>
+              <tr><td class="mono">NotPorted.jsx</td><td class="mono">50</td><td>شاشة بديلة 🚧</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="lede" style="margin:12px 0 0;font-size:13px">
+          <code>_layout.jsx</code> يستدعي <code>I18nManager.allowRTL(true)</code> و
+          <code>forceRTL(true)</code>، ويحمّل أربعة أوزان من Tajawal، ويغلّف الشجرة بـ
+          <code>SafeAreaProvider → ThemeProvider → Stack</code>.
+        </p>
+      </div>
+    </div>
+
+    <div class="t-wrap">
+      <table class="t">
+        <thead><tr><th>البنية التقنية</th><th>القيمة</th></tr></thead>
+        <tbody>
+          <tr><td>الإطار</td><td class="mono">expo ~57.0.27 · react-native 0.86.3 · react 19.2.3</td></tr>
+          <tr><td>التنقل</td><td class="mono">expo-router ~57.0.25</td></tr>
+          <tr><td>التخزين</td><td class="mono">expo-secure-store · @react-native-async-storage 2.2.0</td></tr>
+          <tr><td>الصور والخطوط</td><td class="mono">expo-image-picker · expo-font · @expo-google-fonts/tajawal</td></tr>
+          <tr><td>اللغة</td><td>JavaScript — <code>.jsx</code>/<code>.js</code>، لا TypeScript</td></tr>
+          <tr><td>المجلدات الأصلية</td><td>لا <code>ios/</code> ولا <code>android/</code> — توليد أصلي مستمر (CNG) عبر <code>app.json</code></td></tr>
+          <tr><td>الأذونات</td><td>نصوص عربية في إضافة <code>expo-image-picker</code> داخل <code>app.json</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note note-warn">
+      <div class="note-title">🚫 لا يوجد مسار بناء — هذه هي الفجوة الحقيقية</div>
+      لا <code>eas.json</code>، ولا <code>extra.eas.projectId</code>، ولا
+      <code>app.config.js</code>. EAS <b>موصوف فقط</b> في ملفي <code>README.md</code> و
+      <code>AGENTS.md</code> ولم يُربط فعلياً، فالنسخة تعمل <b>داخل Expo Go حصراً ولا تستطيع
+      حالياً إنتاج ملف قابل للتثبيت</b> — في مقابل نسخة Flutter التي لديها خط إنتاج عامل إلى
+      TestFlight. إضافةً إلى ذلك المجلد غير متتبَّع في git، فلا شيء منه داخل التاريخ المُراجَع.
+    </div>
+  </section>
+
+  <!-- 9. SCORECARD -->
+  <section id="compare">
+    <h2>
+      <span class="h2-num" style="background:var(--pink-bg);color:var(--pink)">9</span>
+      Flutter مقابل Expo — الموازنة
+    </h2>
+    <p class="lede">
+      الخلاصات أدناه من قياس فعلي داخل هذا المستودع، ومن استنتاجات
+      <code>layaqtek_expo/README.md</code> نفسه. القاعدة العامة التي خرجت بها التجربة:
+      <b>المنطق ينتقل، والواجهة تُعاد كتابتها</b>.
+    </p>
+
+    <div class="sc">
+      <div class="sc-col sc-flutter">
+        <div class="sc-head">🐦 ما يرجّح Flutter</div>
+        <div class="sc-item">
+          <b>↔️ RTL يعمل دون جهد</b>
+          سطر <code>Directionality</code> واحد يغطي التطبيق كله وفوراً. في React Native،
+          <code>I18nManager.forceRTL</code> لا يسري إلا عند بدء التطبيق — فلو عُدِّل أثناء
+          التطوير لا يتأثر التخطيط حتى إعادة تحميل كاملة. لهذا تضبط أنماط Expo
+          <code>textAlign</code> و <code>writingDirection</code> صراحةً. مضايقة متكررة في
+          تطبيق عربي بالأساس، لا إعداد لمرة واحدة.
+        </div>
+        <div class="sc-item">
+          <b>🚀 خط إنتاج عامل اليوم</b>
+          <code>codemagic.yaml</code> يبني IPA موقّعاً ويرسله إلى TestFlight. Expo لا تملك
+          <code>eas.json</code> بعد.
+        </div>
+        <div class="sc-item">
+          <b>✅ تكافؤ كامل مع الويب</b>
+          خمس شاشات وثلاث أوراق، 3,003 سطر. الفجوة الوحيدة شاشة إعادة تعيين كلمة المرور،
+          وهي مُفوَّضة للويب عن قصد.
+        </div>
+      </div>
+
+      <div class="sc-col sc-expo">
+        <div class="sc-head">⚛️ ما يرجّح Expo</div>
+        <div class="sc-item">
+          <b>♻️ منطق واحد بلغة واحدة</b>
+          <code>src/api.js</code> نسخة شبه حرفية من <code>frontend-react/src/api.js</code> —
+          نفس الدوال التسعة عشر ونفس رسائل الخطأ العربية. الاختلاف الشكلي الوحيد أن التخزين
+          على الجوال غير متزامن فأصبحت الدوال تُرجع <code>Promise</code>، وهو نفس شكل
+          <code>Future</code> في Dart. الربح: صيانة طبقة منطق واحدة بدل اثنتين بـ JavaScript
+          و Dart.
+        </div>
+        <div class="sc-item">
+          <b>🔐 تخزين آمن للرمز</b>
+          <code>expo-secure-store</code> يعني Keychain على iOS و Keystore على Android.
+          نسخة Flutter تستخدم <code>shared_preferences</code> وهو تخزين نصي غير مشفّر.
+        </div>
+        <div class="sc-item">
+          <b>🛠️ تطوير بلا أدوات ثقيلة</b>
+          لا حاجة إلى Android Studio ولا Xcode للتطوير — مسح رمز QR بتطبيق Expo Go يكفي.
+          وهذا أكبر فرق عملي يومي عن Flutter.
+        </div>
+      </div>
+    </div>
+
+    <div class="note note-info" style="margin-top:16px">
+      <div class="note-title">📐 ما لا ينتقل في الحالتين: الواجهة</div>
+      كل <code>&lt;div&gt;</code> يصبح <code>&lt;View&gt;</code>، وكل <code>className</code>
+      يصبح كائن <code>StyleSheet</code>. شاشة تسجيل الدخول وحدها:
+      <b>153 سطراً</b> في الويب، <b>267</b> في Flutter، <b>338</b> في Expo — والزيادة كلها
+      أنماط كانت مجمّعة في <code>index.css</code>.
+    </div>
+
+    <div class="note note-amber">
+      <div class="note-title">⚖️ القرار لا يزال مفتوحاً</div>
+      هذا ما تقوله التجربة عن نفسها. كشف النقاط ذو وجهين — Expo تكسب في المنطق المشترك
+      والتخزين الآمن، وتخسر في RTL وتكلفة إعادة كتابة الواجهة — وهو ما يتفق مع حالة
+      «تقييم» لا «انتقال». المتبقي للوصول إلى تكافؤ كامل، بأسماء الملفات:
+      <code>dashboard</code>، <code>progress</code>، <code>add_food_sheet</code>،
+      <code>goals_edit_sheet</code>، <code>ai_analyzer_section</code>، و شاشتا
+      <code>forgot-password</code> و <code>profile-setup</code>.
+    </div>
+  </section>
+
+  <!-- 10. FINDINGS -->
+  <section id="notes">
+    <h2>
+      <span class="h2-num" style="background:var(--red-bg);color:var(--red)">10</span>
+      ملاحظات ومخاطر
+    </h2>
+    <p class="lede">
+      نقاط خرجت من قراءة الملفات، مرتّبة من الأكثر إلحاحاً. ليست كلها أخطاء — بعضها قرارات
+      مقصودة تستحق التوثيق كي لا تُعاد مناقشتها.
+    </p>
+
+    <div class="t-wrap" style="margin-bottom:0">
+      <table class="t">
+        <thead>
+          <tr><th style="width:118px">الفئة</th><th>الملاحظة</th><th>الملف</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-no">أمان</span></td>
+            <td>الرمز (JWT) يُوقَّع <b>دون <code>expiresIn</code></b>، فالجلسة لا تنتهي أبداً حتى
+              تسجيل الخروج يدوياً. وفي Flutter يُحفظ هذا الرمز غير المنتهي في
+              <code>shared_preferences</code> <b>بنص صريح غير مشفّر</b> — اجتماع الأمرين هو
+              ما يرفع الخطورة، لا أحدهما منفرداً.</td>
+            <td class="mono">backend/routes/auth.js<br>lib/api.dart</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-wip">نشر</span></td>
+            <td>ثلاثة معرّفات حزمة مختلفة: <code>com.layaqtek.layaqtekApp</code> (توقيع iOS)،
+              <code>com.layaqtek.layaqtek_app</code> (Android)،
+              <code>com.layaqtek.app</code> (Expo). توحيدها قبل النشر أرخص بكثير من بعده —
+              معرّف الحزمة غير قابل للتغيير بعد أول إصدار.</td>
+            <td class="mono">codemagic.yaml<br>build.gradle.kts<br>app.json</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-wip">نشر</span></td>
+            <td><code>APP_STORE_APPLE_ID</code> لا يزال <code>""</code>. مقبول لأول بناء،
+              لكن تركه بعد إنشاء سجل التطبيق يعني أن كل بناء يحمل الرقم <code>1</code>
+              ويُرفض الرفع الثاني.</td>
+            <td class="mono">codemagic.yaml</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-ok">مقصود</span></td>
+            <td>لا شاشة لإعادة تعيين كلمة المرور داخل التطبيق: رابط البريد يفتح صفحة الويب
+              <code>/#/reset-password</code>، ولهذا لا توجد دالة مقابلة في
+              <code>class Api</code>. هذه الفجوة الوحيدة في التكافؤ مع الويب، وهي قرار لا سهو.</td>
+            <td class="mono">lib/api.dart<br>layaqtek_app/README.md</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-no">هشاشة</span></td>
+            <td>فشل تمرير <code>--dart-define=API_BASE_URL</code> لا يُنتج خطأ بناء، بل تطبيقاً
+              يبدو سليماً وتفشل فيه كل الطلبات. الحماية الوحيدة اليوم هي سطر واحد في
+              <code>codemagic.yaml</code>؛ أي بناء يدوي خارجه معرّض للخطأ.</td>
+            <td class="mono">lib/api.dart:16</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-wip">عملية</span></td>
+            <td><code>layaqtek_expo/</code> غير متتبَّع في git، فلا شيء منه داخل التاريخ
+              المُراجَع، ويمكن أن يُفقد بالكامل بأمر تنظيف واحد.</td>
+            <td class="mono">git status</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-wip">جودة</span></td>
+            <td><code>flutter analyze</code> يعمل بـ <code>ignore_failure: true</code>، أي أنه
+              تقرير لا بوابة. البناء يستمر مهما كانت نتيجة التحليل — مناسب الآن، لكنه يعني
+              أن الخط لا يحمي من تراجع الجودة.</td>
+            <td class="mono">codemagic.yaml</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div>
+    <b>معمارية تطبيق لياقتك للجوال</b> — مستند تقني مستقل، مولّد من قراءة ملفات المستودع.
+  </div>
+  <div style="margin-top:6px">
+    نطاق هذا المستند: <code>layaqtek_app/</code> و <code>layaqtek_expo/</code> و
+    <code>codemagic.yaml</code>. لمعمارية الويب والخادم وقاعدة البيانات راجع
+    <a href="Architecture.html" style="color:var(--green);font-weight:700">Architecture.html</a>
+    — وهو مستند أقدم يحتاج تحديثاً (يذكر OpenRouter بدل Gemini، و Firebase Auth غير
+    المستخدمة أصلاً).
+  </div>
+</footer>
+
+</body>
+</html>
