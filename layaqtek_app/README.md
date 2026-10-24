@@ -38,15 +38,44 @@ flutter run --dart-define=API_BASE_URL=http://YOUR_PC_IP:3001
 | جوال حقيقي على نفس الشبكة | `http://YOUR_PC_IP:3001` (اعرف الآيبي بأمر `ipconfig`) |
 | الخادم المنشور | `https://your-project.vercel.app` |
 
-**ملاحظة للجوال الحقيقي:** أضف آيبي جهازك لقائمة CORS في `backend/server.js`.
+**ملاحظة عن CORS:** لا حاجة لأي تعديل. طلبات التطبيق الأصلي (Flutter)
+لا ترسل ترويسة `Origin`، و`backend/server.js` يسمح بمرورها عبر
+`if (!origin) return callback(null, true)`. قائمة CORS تخص المتصفح فقط.
 
-## بناء iOS بدون ماك
+## الاختبار على iPhone بدون ماك
 
-استخدم [Codemagic](https://codemagic.io):
-1. سجّل حساب مجاني (500 دقيقة/شهر على أجهزة ماك سحابية)
-2. اربط مستودع GitHub
-3. اختر Flutter workflow → iOS
-4. للنشر على App Store تحتاج حساب Apple Developer ($99/سنة)
+ملف `codemagic.yaml` في جذر المستودع يبني التطبيق ويرسله إلى TestFlight
+تلقائياً عند كل دفعة على فرع `master`.
+
+### المتطلبات
+
+| العنصر المطلوب | التكلفة |
+|---|---|
+| حساب Apple Developer | $99/سنة — إلزامي لأي تثبيت على جهاز حقيقي |
+| Codemagic | مجاني (500 دقيقة macOS شهرياً ≈ 30 بناءً) |
+
+### الخطوات
+
+1. **اشترك في Apple Developer Program** — الموافقة تستغرق 24–48 ساعة
+   وتعطل كل ما بعدها، فابدأ بها.
+2. سجّل معرف التطبيق `com.layaqtek.layaqtekApp` في Certificates, Identifiers
+   & Profiles، ثم أنشئ سجل التطبيق في App Store Connect.
+3. أنشئ مفتاح App Store Connect API بصلاحية **App Manager**، ونزّل ملف
+   `.p8` (يُنزّل مرة واحدة فقط). احتفظ به خارج المستودع — `*.p8` مضاف إلى
+   `.gitignore`.
+4. في Codemagic: اربط مستودع GitHub، ثم Teams → Integrations → App Store
+   Connect وارفع المفتاح باسم `layaqtek_asc_key` بالضبط.
+5. املأ `APP_STORE_APPLE_ID` في `codemagic.yaml` بالرقم الموجود في صفحة
+   App Information. (البناء الأول يعمل وهو فارغ.)
+6. ادفع على `master` — يبدأ البناء تلقائياً (~12–15 دقيقة).
+7. في App Store Connect → TestFlight → Internal Testing: أضف نفسك كمختبر، ثم
+   ثبّت تطبيق **TestFlight** على الجوال واقبل الدعوة.
+
+الاختبار الداخلي لا يحتاج مراجعة App Review، ويسمح بـ 100 مختبر.
+
+**ملاحظة مهمة:** البناء يمرر `--dart-define=API_BASE_URL=https://layaqtek.vercel.app`.
+بدونه يعود التطبيق إلى القيمة الافتراضية `http://10.0.2.2:3001` (عنوان محاكي
+Android) وتفشل جميع الطلبات على الجوال.
 
 ## هيكل المشروع
 

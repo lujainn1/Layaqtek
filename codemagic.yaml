@@ -1,0 +1,88 @@
+# Codemagic CI/CD — builds the Flutter app (layaqtek_app) for iOS and ships it
+# to TestFlight. Must live at the repository root; Codemagic does not read this
+# file from a subdirectory.
+#
+# Before the first build, set these up in the Codemagic UI:
+#   1. Teams -> Integrations -> App Store Connect: upload the .p8 API key with
+#      its Issuer ID and Key ID, named exactly `layaqtek_asc_key`.
+#   2. Fill in APP_STORE_APPLE_ID below (the numeric Apple ID shown on your
+#      app's App Information page in App Store Connect). Until it is set, the
+#      build still works and starts the build number at 1.
+
+workflows:
+  ios-testflight:
+    name: Layaqtek iOS TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.layaqtek.layaqtekApp
+      vars:
+        # Numeric Apple ID from App Store Connect -> your app -> App Information.
+        # Leave empty for the very first build (before the app record exists).
+        APP_STORE_APPLE_ID: ""
+        # The deployed backend. Without this the app would fall back to the
+        # Android emulator address in lib/api.dart and every request would fail.
+        API_BASE_URL: "https://layaqtek.vercel.app"
+
+    integrations:
+      app_store_connect: layaqtek_asc_key
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        # The working branch is `master`, not `main` — a `main` pattern here
+        # would silently never trigger a build.
+        - pattern: master
+          include: true
+
+    scripts:
+      - name: Flutter packages
+        script: |
+          cd layaqtek_app
+          flutter pub get
+
+      - name: Analyze
+        script: |
+          cd layaqtek_app
+          flutter analyze --no-fatal-infos --no-fatal-warnings
+        ignore_failure: true
+
+      - name: Build IPA
+        script: |
+          cd layaqtek_app
+
+          # Derive the next build number from what TestFlight already has, so
+          # uploads are never rejected for a duplicate. Falls back to 1 on the
+          # first build, when the app record does not exist yet.
+          LATEST=0
+          if [ -n "$APP_STORE_APPLE_ID" ]; then
+            LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || echo 0)
+          fi
+          BUILD_NUMBER=$((LATEST + 1))
+          echo "Building with build number $BUILD_NUMBER against $API_BASE_URL"
+
+          flutter build ipa --release \
+            --build-number="$BUILD_NUMBER" \
+            --dart-define=API_BASE_URL="$API_BASE_URL" \
+            --export-options-plist=/Users/builder/export_options.plist
+
+    artifacts:
+      - layaqtek_app/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - layaqtek_app/flutter_drive.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+      # Add your address here if you want build result emails:
+      # email:
+      #   recipients:
+      #     - you@example.com
